@@ -13,6 +13,12 @@ import { DataCache } from './data-cache';
 import { EOperation } from './e-operation';
 import { Scheduler } from './scheduler';
 import { ServiceInterface } from './service-interface';
+import { Type } from '../../../../../util/type';
+import { CEGConnection } from '../../../../../model/CEGConnection';
+import { ProcessConnection } from '../../../../../model/ProcessConnection';
+import { IModelConnection } from '../../../../../model/IModelConnection';
+import { IModelNode } from '../../../../../model/IModelNode';
+import { Arrays } from '../../../../../util/arrays';
 
 /**
  * The interface to all data handling things.
@@ -78,6 +84,10 @@ export class SpecmateDataService {
         return this.createElementServer(element);
     }
 
+    public deleteCachedContent(url: string) {
+        this.cache.deleteElement(url);
+    }
+
     public readContents(url: string, virtual?: boolean): Promise<IContainer[]> {
         this.busy = true;
 
@@ -109,7 +119,7 @@ export class SpecmateDataService {
         return contents;
     }
 
-    public readElement(url: string, virtual?: boolean): Promise<IContainer> {
+    public async readElement(url: string, virtual?: boolean): Promise<IContainer> {
         this.busy = true;
         let readElementTask: Promise<IContainer> = undefined;
 
@@ -155,6 +165,15 @@ export class SpecmateDataService {
             return Promise.resolve(this.deleteElementVirtual(url, compoundId));
         }
         return this.deleteElementServer(url);
+    }
+
+    public async clearModel(nodes: IContainer[], connections: IContainer[], compoundId = Id.uuid): Promise<void> {
+        for (let i = connections.length - 1; i >= 0; i--) {
+            await this.deleteElement(connections[i].url, true, compoundId);
+        }
+        for (let i = nodes.length - 1; i >= 0; i--) {
+            await this.deleteElement(nodes[i].url, true, compoundId);
+        }
     }
 
     public sanitizeContentPositions(elements: IPositionable[], update: boolean, compoundId?: string): void {
@@ -205,6 +224,18 @@ export class SpecmateDataService {
     }
 
     public undoCreate(url: string) {
+        const element = this.readElementVirtual(url);
+        if (Type.of(element) === CEGConnection.name || Type.of(element) === ProcessConnection.name) {
+            const connection = element as IModelConnection;
+            const source = this.readElementVirtual(connection.source.url) as IModelNode;
+            const target = this.readElementVirtual(connection.target.url) as IModelNode;
+            const outgoingConnection = source.outgoingConnections.find(proxy => proxy.url === connection.url);
+            const incomingConnection = target.incomingConnections.find(proxy => proxy.url === connection.url);
+            Arrays.remove(source.outgoingConnections, outgoingConnection);
+            Arrays.remove(target.incomingConnections, incomingConnection);
+            this.cache.addElement(source);
+            this.cache.addElement(target);
+        }
         this.cache.deleteElement(url);
     }
 
@@ -263,16 +294,20 @@ export class SpecmateDataService {
         }).catch((error) => this.handleError(this.translate.instant('contentsCouldNotBeRead'), url, error));
     }
 
-    private readElementServer(url: string): Promise<IContainer> {
+    private async readElementServer(url: string): Promise<IContainer> {
         if (!this.auth.isAuthenticatedForUrl(url)) {
-            return Promise.resolve(undefined);
+            return undefined;
         }
         this.logStart(this.translate.instant('log.readElement'), url);
-        return this.serviceInterface.readElement(url, this.auth.token).then((element: IContainer) => {
+        try {
+            const element = await this.serviceInterface.readElement(url, this.auth.token);
             this.cache.addElement(element);
-            this.logFinished(this.translate.instant('log.readElement'), url);
             return this.cache.readElement(url);
-        }).catch((error) => this.handleError(this.translate.instant('elementCouldNotBeRead'), url, error));
+        } catch (error) {
+            this.handleError(this.translate.instant('elementCouldNotBeRead'), url, error);
+        } finally {
+            this.logFinished(this.translate.instant('log.readElement'), url);
+        }
     }
 
     private updateElementServer(element: IContainer): Promise<void> {
@@ -297,9 +332,9 @@ export class SpecmateDataService {
         }).catch((error) => this.handleError(this.translate.instant('elementCouldNotBeDeleted'), url, error));
     }
 
-    public performOperations(url: string, operation: string, payload?: any): Promise<void> {
+    public performOperations(url: string, operation: string, payload?: any): Promise<any> {
         if (!this.auth.isAuthenticatedForUrl(url)) {
-            return Promise.resolve();
+            return Promise.resolve(false);
         }
         this.busy = true;
         return this.serviceInterface.performOperation(url, operation, payload, this.auth.token).then((result) => {

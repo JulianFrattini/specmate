@@ -685,7 +685,8 @@ public class BasePackageImpl extends EPackageImpl implements BasePackage {
 			 "longDesc", "",
 			 "required", "true",
 			 "type", "text",
-			 "position", "0"
+			 "position", "0",
+			 "allowedPattern", "^[^,;|]*$"
 		   });	
 		addAnnotation
 		  (getIDescribed_Description(), 
@@ -695,7 +696,7 @@ public class BasePackageImpl extends EPackageImpl implements BasePackage {
 			 "longDesc", "",
 			 "required", "false",
 			 "type", "longText",
-			 "rows", "8",
+			 "rows", "5",
 			 "position", "100"
 		   });
 	}
