@@ -1,12 +1,12 @@
 # Specmate
 
 ## How to set up your development environment
-1. Install Eclipse Neon.2 Modeling Tools
+1. Install Eclipse Neon.2 Modeling Tools (Eclipse Oxygen, Version 4.7)
 2. From the Eclipse Marketplace, install 
     - bndtools 4.2
     - Acceleo 3.7
 3. Install node js version 10
-4. In the folder web, run npm run init.
+4. In the folder web, run npm run init and npm run build-dev.
 5. Import all projects in the bundles folder into your Eclipse workspace
 6. Open specmate-std-env/dev-specmate-all.bndrun and hit the run button
 
