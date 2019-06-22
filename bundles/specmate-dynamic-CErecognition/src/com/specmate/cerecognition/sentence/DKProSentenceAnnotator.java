@@ -1,33 +1,22 @@
 package com.specmate.cerecognition.sentence;
 
-import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngine;
-import static org.apache.uima.fit.factory.AnalysisEngineFactory.createEngineDescription;
-
-import java.util.ArrayList;
-
-import org.apache.uima.analysis_engine.AnalysisEngine;
-import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.cas.FeatureStructure;
-import org.apache.uima.fit.factory.JCasFactory;
-import org.apache.uima.fit.pipeline.SimplePipeline;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
-import org.apache.uima.jcas.tcas.Annotation;
+import org.osgi.service.component.annotations.Reference;
 
 import com.specmate.cerecognition.util.Globals;
+import com.specmate.common.exception.SpecmateException;
+import com.specmate.nlp.api.ELanguage;
+import com.specmate.nlp.api.INLPService;
 
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 import de.tudarmstadt.ukp.dkpro.core.api.syntax.type.constituent.Constituent;
-import de.tudarmstadt.ukp.dkpro.core.api.syntax.type.dependency.Dependency;
-import de.tudarmstadt.ukp.dkpro.core.maltparser.MaltParser;
-import de.tudarmstadt.ukp.dkpro.core.opennlp.OpenNlpChunker;
-import de.tudarmstadt.ukp.dkpro.core.opennlp.OpenNlpParser;
-import de.tudarmstadt.ukp.dkpro.core.opennlp.OpenNlpPosTagger;
-import de.tudarmstadt.ukp.dkpro.core.opennlp.OpenNlpSegmenter;
 
 public class DKProSentenceAnnotator {
 	private static DKProSentenceAnnotator instance;
-	private static AnalysisEngine engine;
+	
+	private INLPService nlp = null;
 	
 	public static DKProSentenceAnnotator getInstance() {
 		if(instance == null) 
@@ -37,53 +26,26 @@ public class DKProSentenceAnnotator {
 	}
 		
 	private DKProSentenceAnnotator() {
-		AnalysisEngineDescription segmenter = null;
-		AnalysisEngineDescription posTagger = null;
-        AnalysisEngineDescription chunker = null;
-		AnalysisEngineDescription parser = null;
-		AnalysisEngineDescription dependencyParser = null;
-
-		try {
-			segmenter = createEngineDescription(OpenNlpSegmenter.class, OpenNlpSegmenter.PARAM_LANGUAGE, "en");
-			posTagger = createEngineDescription(OpenNlpPosTagger.class, OpenNlpPosTagger.PARAM_LANGUAGE, "en",
-					OpenNlpPosTagger.PARAM_VARIANT, "maxent");
-            chunker = createEngineDescription(OpenNlpChunker.class, OpenNlpChunker.PARAM_LANGUAGE, "en");
-			dependencyParser = createEngineDescription(MaltParser.class, MaltParser.PARAM_LANGUAGE, "en",
-					MaltParser.PARAM_IGNORE_MISSING_FEATURES, true);
-			parser = createEngineDescription(OpenNlpParser.class, OpenNlpParser.PARAM_PRINT_TAGSET, true,
-					OpenNlpParser.PARAM_LANGUAGE, "en", OpenNlpParser.PARAM_WRITE_PENN_TREE, true,
-					OpenNlpParser.PARAM_WRITE_POS, true);
-			engine = createEngine(createEngineDescription(segmenter, posTagger, chunker, dependencyParser, parser));
-		} catch (Exception e) {
-			System.err.println("Error while creating the DKProAnnotator: " + e.getMessage());
-			System.err.println(e.toString());
-		}
 	}
 	
 	public Sentence createSentence(String text) {
 		
-		JCas processed = processText(text);
-		
-		Constituent topConstituent = JCasUtil.select(processed, Constituent.class).iterator().next();
-		Fragment root = parseFeatureStructure(topConstituent);
-		
-
-		Sentence sentence = new Sentence(Globals.getInstance().getNewSentenceCounter(), 
-				root);
-		return sentence;
-	}
-	
-	private JCas processText(String text) {
-		JCas jcas = null;
+		JCas processed = null;
 		try {
-			jcas = JCasFactory.createJCas();
-			jcas.setDocumentText(text);
-			jcas.setDocumentLanguage("en");
-			SimplePipeline.runPipeline(jcas, engine);
-		} catch (Exception e) {
-			System.err.println(e.toString());
+			processed = nlp.processText(text, ELanguage.EN);
+			
+			Constituent topConstituent = JCasUtil.select(processed, Constituent.class).iterator().next();
+			Fragment root = parseFeatureStructure(topConstituent);
+			
+
+			Sentence sentence = new Sentence(Globals.getInstance().getNewSentenceCounter(), 
+					root);
+			return sentence;
+		} catch (SpecmateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		return jcas;
+		return null;
 	}
 	
 	private Fragment parseFeatureStructure(FeatureStructure top) {
@@ -164,5 +126,10 @@ public class DKProSentenceAnnotator {
 		
 		return f;
 	}*/
+	
+	@Reference
+	void setNlptagging(INLPService nlp) {
+		this.nlp = nlp;
+	}
 }
 

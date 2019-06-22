@@ -4,11 +4,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.ConfigurationPolicy;
-import org.osgi.service.event.EventHandler;
 
 import com.specmate.common.exception.SpecmateException;
-import com.specmate.emfrest.api.IRestService;
 import com.specmate.emfrest.api.RestServiceBase;
 import com.specmate.rest.RestResult;
 
@@ -18,6 +15,11 @@ public class CERecognition extends RestServiceBase  {
 	@Override
 	public String getServiceName() {
 		return "cerec";
+	}
+	
+	@Override
+	public boolean canGet(Object object) {
+		return true;
 	}
 	
 	@Override
