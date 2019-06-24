@@ -1,0 +1,15 @@
+Export-Package: com.specmate.cerecognition.api
+-buildpath: \
+	org.eclipse.osgi.services,\
+	specmate-emfrest-api,\
+	javax.ws.rs-api,\
+	osgi.cmpn,\
+	osgi.core,\
+	specmate-rest;version=latest,\
+	specmate-common;version=latest,\
+	specmate-nlp
+Bundle-Version: 0.0.0.${tstamp}
+Import-Package: *
+-privatepackage: \
+	com.specmate.cerecognition.sentence,\
+	com.specmate.cerecognition.util
