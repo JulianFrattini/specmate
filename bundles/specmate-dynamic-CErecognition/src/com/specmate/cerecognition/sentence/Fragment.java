@@ -1,6 +1,8 @@
 package com.specmate.cerecognition.sentence;
 
-import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
+import java.util.ArrayList;
+
+import com.specmate.cerecognition.pattern.StructureElement;
 
 public abstract class Fragment {
 	private String tag;
@@ -27,5 +29,15 @@ public abstract class Fragment {
 		this.coveredText = coveredText;
 	}
 	
+	public abstract StructureElement generateStructure();
+	
+	// Manipulation
+	public abstract ArrayList<Fragment> split() throws Exception;
+	public abstract ArrayList<Fragment> getBy(boolean byType, String indicator, ArrayList<Fragment> selected);
+	public abstract ArrayList<Fragment> select(boolean byType, String indicator, ArrayList<Fragment> selected);
+	
+	// General
 	public abstract String toString();
+	public abstract boolean equals(Fragment other);
+	
 }

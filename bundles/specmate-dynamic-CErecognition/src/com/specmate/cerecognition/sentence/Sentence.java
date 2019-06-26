@@ -1,6 +1,9 @@
 package com.specmate.cerecognition.sentence;
 
-public class Sentence {
+import com.specmate.cerecognition.pattern.IStructure;
+import com.specmate.cerecognition.pattern.Structure;
+
+public class Sentence implements ISentence {
 	private int index;
 	private Fragment root;
 	
@@ -19,6 +22,14 @@ public class Sentence {
 
 	public void setRoot(Fragment root) {
 		this.root = root;
+	}
+
+	/**
+	 * Extracts the constituency tree without its leaf nodes
+	 */
+	@Override
+	public IStructure generateStructure() {
+		return new Structure(root.generateStructure());
 	}
 	
 	@Override

@@ -12,4 +12,8 @@ Bundle-Version: 0.0.0.${tstamp}
 Import-Package: *
 -privatepackage: \
 	com.specmate.cerecognition.sentence,\
-	com.specmate.cerecognition.util
+	com.specmate.cerecognition.util,\
+	com.specmate.cerecognition.causeeffectgraph,\
+	com.specmate.cerecognition.genetics,\
+	com.specmate.cerecognition.main,\
+	com.specmate.cerecognition.pattern
