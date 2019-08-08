@@ -7,7 +7,10 @@ Export-Package: com.specmate.cerecognition.api
 	osgi.core,\
 	specmate-rest;version=latest,\
 	specmate-common;version=latest,\
-	specmate-nlp
+	specmate-nlp,\
+	specmate-model-gen;version=latest,\
+	specmate-emfjson;version=latest,\
+	org.json;version=latest
 Bundle-Version: 0.0.0.${tstamp}
 Import-Package: *
 -privatepackage: \

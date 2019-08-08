@@ -90,6 +90,10 @@ public class Leaf extends Fragment {
 		return null;
 	}
 	
+	public ArrayList<Fragment> getChildren() {
+		return null;
+	}
+	
 	// TODO Specify Exception
 	@Override 
 	public ArrayList<Fragment> split() throws Exception {
@@ -124,7 +128,11 @@ public class Leaf extends Fragment {
 	}
 
 	@Override
-	public String toString() {
-		return super.getCoveredText();
+	public String toString(boolean structurized) {
+		if(structurized) {
+			return super.getCoveredText() + " (" + super.getTag() + ")";
+		} else {
+			return super.getCoveredText();
+		}
 	}
 }

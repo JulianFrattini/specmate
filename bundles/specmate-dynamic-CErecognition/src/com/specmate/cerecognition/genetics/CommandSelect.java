@@ -76,14 +76,14 @@ public class CommandSelect extends SimpleCommand {
 			}
 		} else if(selected.size() == 0) {
 			System.out.println("ERROR: CommandSelect did not identify an eligible result");
-			System.out.println("  Sentence under test: " + fragment.toString());
+			System.out.println("  Sentence under test: " + fragment.toString(false));
 			System.out.println("  Checking for " + (byType ? "type" : "word") + " " + indicator + " yielded no result");
 		} else if(selected.size() > 1) {
 			System.out.println("ERROR: CommandSelect did identify too many eligible results");
-			System.out.println("  Sentence under test: " + fragment.toString());
-			System.out.println("  Checking for " + (byType ? "type" : "word") + " " + indicator + " yielded no result");
+			System.out.println("  Sentence under test: " + fragment.toString(true));
+			System.out.println("  Checking for " + (byType ? "type" : "word") + " " + indicator + " yielded the following result");
 			for(Fragment s : selected) {
-				System.out.println("   - " + s.toString());
+				System.out.println("   - " + s.toString(true));
 			}
 		} else {
 			System.out.println("ERROR: CommandSelect yielded an unknown selection error");

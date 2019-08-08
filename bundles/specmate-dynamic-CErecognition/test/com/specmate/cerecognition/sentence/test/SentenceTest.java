@@ -9,7 +9,7 @@ import com.specmate.cerecognition.sentence.Sentence;
 
 class SentenceTest {
 
-	@Test
+	/*@Test
 	void test() {
 		String text = "This is the optimized version of my implementation.";
 		
@@ -17,6 +17,6 @@ class SentenceTest {
 		
 		System.out.println(sentence.toString());
 		assert(true);
-	}
+	}*/
 
 }

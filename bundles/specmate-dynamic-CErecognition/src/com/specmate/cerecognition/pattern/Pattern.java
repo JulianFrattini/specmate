@@ -40,6 +40,14 @@ public class Pattern implements IPattern {
 		return index;
 	}
 	
+	public IStructure getStructure() {
+		return sentenceStructure;
+	}
+	
+	public ICauseEffectPattern getGenerationPattern() {
+		return cePattern;
+	}
+	
 	/**
 	 * Checks, whether a new sentence complies with the sentence structure of this pattern
 	 * @param candidate Sentence which has to be checked
@@ -47,10 +55,17 @@ public class Pattern implements IPattern {
 	 */
 	public boolean checkCompliance(ISentence candidate) {
 		//IStructure candidateStructure = candidate.generateStructure();
+		System.out.println("Checking compliance of sentence");
+		System.out.println("\t" + candidate.getRoot().toString(true));
+		System.out.println("\t" + sentenceStructure.toString());
 		if(sentenceStructure.compliedBy(candidate.getRoot())) {
 			return true;
 		}
 		return false;
+	}
+	
+	public boolean checkSentenceCompliance(ISentence candidate, ICauseEffectGraph ceg) {
+		return cePattern.generateGraphFromSentence(candidate).equals(ceg);
 	}
 	
 	public void addSentence(ISentence candidate) {

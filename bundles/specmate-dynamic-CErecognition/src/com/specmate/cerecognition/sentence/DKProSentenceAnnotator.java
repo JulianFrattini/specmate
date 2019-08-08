@@ -13,23 +13,14 @@ import com.specmate.nlp.api.INLPService;
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 import de.tudarmstadt.ukp.dkpro.core.api.syntax.type.constituent.Constituent;
 
-public class DKProSentenceAnnotator {
-	private static DKProSentenceAnnotator instance;
-	
+public class DKProSentenceAnnotator {	
 	private INLPService nlp = null;
-	
-	public static DKProSentenceAnnotator getInstance() {
-		if(instance == null) 
-			instance = new DKProSentenceAnnotator();
 		
-		return instance;
-	}
-		
-	private DKProSentenceAnnotator() {
+	public DKProSentenceAnnotator(INLPService nlp) {
+		this.nlp = nlp;
 	}
 	
 	public Sentence createSentence(String text) {
-		
 		JCas processed = null;
 		try {
 			processed = nlp.processText(text, ELanguage.EN);
@@ -38,7 +29,8 @@ public class DKProSentenceAnnotator {
 			Fragment root = parseFeatureStructure(topConstituent);
 			
 
-			Sentence sentence = new Sentence(Globals.getInstance().getNewSentenceCounter(), 
+			Sentence sentence = new Sentence(
+					Globals.getInstance().getNewSentenceCounter(), 
 					root);
 			return sentence;
 		} catch (SpecmateException e) {
@@ -126,10 +118,5 @@ public class DKProSentenceAnnotator {
 		
 		return f;
 	}*/
-	
-	@Reference
-	void setNlptagging(INLPService nlp) {
-		this.nlp = nlp;
-	}
 }
 

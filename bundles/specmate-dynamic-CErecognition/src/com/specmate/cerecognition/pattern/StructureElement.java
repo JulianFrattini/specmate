@@ -61,8 +61,9 @@ public class StructureElement {
 	 */
 	public boolean compliedBy(Fragment fragment) {
 		// check if the tag is equal
-		if(!tag.equals(fragment.getTag()))
-				return false;
+		if(!tag.equals(fragment.getTag())) {
+			return false;
+		}
 		
 		// if a keyword-whitelist exists: check if the fragment contains at least one whitelisted word
 		if(!keywords_whitelist.isEmpty()) {
@@ -87,18 +88,32 @@ public class StructureElement {
 			}
 		}
 		
+		// count number of important children (children, which have children themselves)
+		int fullsize = 0;
+		if(fragment instanceof Node) {
+			Node node = ((Node) fragment);
+			
+			for(Fragment child : node.getChildren()) {
+				if(child instanceof Node) {
+					fullsize++;
+				}
+			}
+		}
+		
 		// check if the number of children is equal
 		if(children.size() > 0) {
-			if(fragment instanceof Node) {
-				if(children.size() != ((Node) fragment).getChildren().size())
+			if(fragment instanceof Node) {				
+				if(children.size() != fullsize) { 
 					return false;
+				}
 			} else {
 				return false;
 			}
 		} else {
 			if(fragment instanceof Node) {
-				if(children.size() != ((Node) fragment).getChildren().size())
+				if(children.size() != fullsize) {
 					return false;
+				}
 			}
 		}
 		
@@ -106,10 +121,11 @@ public class StructureElement {
 		if(children.size() > 0 && fragment instanceof Node) {
 			for(int i = 0; i < children.size(); i++) {
 				StructureElement structureChild = ((ArrayList<StructureElement>) children).get(i);
-				Fragment fragmentChild = ((Node) fragment).getChildren().get(i);
+				Fragment fragmentChild = ((Node) fragment).getParentingChildren().get(i);
 				
-				if(!structureChild.compliedBy(fragmentChild))
+				if(!structureChild.compliedBy(fragmentChild)) {
 					return false;
+				}
 			}
 		}
 		
@@ -120,6 +136,7 @@ public class StructureElement {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
+		
 		sb.append("(" + tag + ")");
 		if(!keywords_whitelist.isEmpty()) {
 			sb.append("+(" + getKeywordString(keywords_whitelist) + ")");
@@ -129,7 +146,7 @@ public class StructureElement {
 		}
 		
 		if(!children.isEmpty()) {
-			sb.insert(0, "{");
+			sb.append("{");
 			for(StructureElement child : children) {
 				sb.append(child.toString());
 			}

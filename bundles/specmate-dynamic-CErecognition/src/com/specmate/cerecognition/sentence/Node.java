@@ -21,12 +21,30 @@ public class Node extends Fragment {
 	public ArrayList<Fragment> getChildren() {
 		return children;
 	}
+
+	/**
+	 * Returns only those children that have children themselves (meaning that they are relevant for the structure)
+	 * @return
+	 */
+	public ArrayList<Fragment> getParentingChildren() {
+		ArrayList<Fragment> parenting = new ArrayList<Fragment>();
+		
+		for(Fragment child : children) {
+			if(child.getChildren() != null) {
+				parenting.add(child);
+			}
+		}
+		
+		return parenting;
+	}
 	
 	@Override
 	public StructureElement generateStructure() {
 		StructureElement structure = new StructureElement(super.getTag());
 		for(Fragment child : children) {
-			structure.addChild(child.generateStructure());
+			StructureElement childStructure = child.generateStructure();
+			if(childStructure != null) 
+				structure.addChild(childStructure);
 		}
 		return structure;
 	}
@@ -92,9 +110,17 @@ public class Node extends Fragment {
 	}
 	
 	@Override
-	public String toString() {
-		StringJoiner sj = new StringJoiner(" ");
-		children.forEach(c -> sj.add(c.toString()));
-		return sj.toString();
+	public String toString(boolean structurized) {
+		if(structurized) {
+			StringJoiner sj = new StringJoiner("");
+			sj.add("(" + super.getTag() + "){");
+			children.forEach(c -> sj.add(c.toString(true)));
+			sj.add("}");
+			return sj.toString();
+		} else {
+			StringJoiner sj = new StringJoiner(" ");
+			children.forEach(c -> sj.add(c.toString(false)));
+			return sj.toString();
+		}
 	}
 }

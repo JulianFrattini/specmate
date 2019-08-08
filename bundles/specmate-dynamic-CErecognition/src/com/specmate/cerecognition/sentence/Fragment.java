@@ -30,6 +30,7 @@ public abstract class Fragment {
 	}
 	
 	public abstract StructureElement generateStructure();
+	public abstract ArrayList<Fragment> getChildren();
 	
 	// Manipulation
 	public abstract ArrayList<Fragment> split() throws Exception;
@@ -37,7 +38,7 @@ public abstract class Fragment {
 	public abstract ArrayList<Fragment> select(boolean byType, String indicator, ArrayList<Fragment> selected);
 	
 	// General
-	public abstract String toString();
+	public abstract String toString(boolean structurized);
 	public abstract boolean equals(Fragment other);
 	
 }

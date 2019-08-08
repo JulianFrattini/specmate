@@ -14,8 +14,11 @@ public class Globals {
 	// index of the annotated sentences
 	private int sentenceCounter;
 	
+	private int patternCounter;
+	
 	private Globals() {
 		sentenceCounter = 0;
+		patternCounter = 0;
 	}
 	
 	public int getCurrentSentenceCounter() {
@@ -25,6 +28,12 @@ public class Globals {
 	public int getNewSentenceCounter() {
 		int current = sentenceCounter;
 		sentenceCounter++;
+		return current;
+	}
+	
+	public int getNewPatternCounter() {
+		int current = patternCounter;
+		patternCounter++;
 		return current;
 	}
 }

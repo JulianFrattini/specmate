@@ -67,6 +67,7 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 			// no node in the tree of constituents exclusively contains the full expression
 			// horizontal approach: find one governing leaf among the nodes that make up the expression
 			
+			// TODO end loop once governing is found
 			boolean governingFound = false;
 			
 			String[] wordsOfExpression = ce.split(" ");
@@ -79,21 +80,26 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 				for(Fragment eligibleFragment : set) {
 					ArrayList<String> remainingWordsOfExpression = StringUtils.generateListWithout(wordsOfExpression, word);
 				
-					if(((Leaf) eligibleFragment).isGoverningAll(remainingWordsOfExpression)) {
+					Leaf governor = (Leaf) eligibleFragment;
+					if(governor.isGoverningAll(remainingWordsOfExpression)) {
 						governingFound = true;
 						
 						// create a command that selects the governing leaf node
 						SimpleCommand selectEligible = generateCommandPattern(sentence, eligibleFragment.getCoveredText()).getCommand();
 						
 						//TODO create pickers for the governed leaf nodes
-						/*for(String other : remainingWordsOfExpression) {
-							CommandPick picker = 
-						}*/
+						for(String other : remainingWordsOfExpression) {
+							CommandPick picker = generateCommandPickFor(governor, other);
+							selectEligible.getFinal().addHorizontalSelection(picker);
+						}
+						selectEligible.getFinal().setPositionOfSelectedBetweenHorizontalSelection(
+								StringUtils.getPositionOfWordInExpression(ce, governor.getCoveredText()));
+						command = selectEligible;
+						break;
 					}
 				}
 			}
 		}
-		
 		
 		//TODO catch empty command objects
 		return new SimpleCauseEffectGenerator(command);
@@ -153,5 +159,24 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 			existing.chainCommand(next);
 			return existing;
 		}
+	}
+	
+	private CommandPick generateCommandPickFor(Leaf leaf, String governed) {
+		for(Leaf gov : leaf.getGoverned()) {
+			if(gov.getCoveredText().contentEquals(governed)) {
+				return new CommandPick(gov.getDependencyRelationType());
+			}
+		}
+		
+		// transitive approach, as the current node does not directly govern the relevant node
+		for(Leaf gov : leaf.getGoverned()) {
+			CommandPick transitiveSearchResult = generateCommandPickFor(gov, governed);
+			if(transitiveSearchResult != null) {
+				CommandPick initialize = new CommandPick(gov.getDependencyRelationType());
+				initialize.chainCommand(transitiveSearchResult);
+				return initialize;
+			}
+		}
+		return null;
 	}
 }
