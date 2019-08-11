@@ -17,4 +17,6 @@ public interface IPattern {
 	
 	public ICauseEffectGraph generateCauseEffectGraph(ISentence sentence);
 	public boolean checkSentenceCompliance(ISentence candidate, ICauseEffectGraph ceg);
+	
+	public String toString();
 }

@@ -12,17 +12,15 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.specmate.cerecognition.causeeffectgraph.ICauseEffectGraph;
-import com.specmate.cerecognition.main.Main;
 import com.specmate.cerecognition.pattern.IPattern;
 import com.specmate.common.exception.SpecmateException;
 import com.specmate.emfrest.api.IRestService;
 import com.specmate.emfrest.api.RestServiceBase;
-import com.specmate.nlp.api.INLPService;
 import com.specmate.rest.RestResult;
 
 @Component(immediate=true, service = IRestService.class)
-public class CERecognition extends RestServiceBase  {
-	private ICauseEffectTrainer main;
+public class CERecognitionRestService extends RestServiceBase  {
+	private ICauseEffectRecognition main;
 
 	@Activate
 	public void start() {
@@ -128,7 +126,7 @@ public class CERecognition extends RestServiceBase  {
 	}
 	
 	@Reference
-	void setICauseEffectTrainer(ICauseEffectTrainer main) {
+	void setICauseEffectTrainer(ICauseEffectRecognition main) {
 		this.main = main;
 	}
 }

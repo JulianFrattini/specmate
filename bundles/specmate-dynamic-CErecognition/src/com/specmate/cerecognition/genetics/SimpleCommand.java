@@ -22,7 +22,7 @@ public abstract class SimpleCommand implements ICommand {
 		}
 	}
 	
-	public abstract String generateOutput(Fragment fragment) throws IllegalArgumentException, Exception;
+	public abstract String generateOutput(Fragment fragment) ;
 	public abstract String toString();
 	
 	/** 

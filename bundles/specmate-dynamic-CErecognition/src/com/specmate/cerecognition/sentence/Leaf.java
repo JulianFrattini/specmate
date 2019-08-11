@@ -122,8 +122,9 @@ public class Leaf extends Fragment {
 	
 	// TODO Specify Exception
 	@Override 
-	public ArrayList<Fragment> split() throws Exception {
-		throw new Exception("Trying to invoke a 'split'-command on a leaf node");
+	public ArrayList<Fragment> split() {
+		System.out.println("ERROR: Trying to invoke a 'split'-command on a leaf node");
+		return null;
 	}
 	
 	@Override
@@ -135,7 +136,6 @@ public class Leaf extends Fragment {
 		}
 		return selected;
 	}
-
 
 	@Override
 	public ArrayList<Fragment> getBy(boolean byType, String indicator, ArrayList<Fragment> selected) {

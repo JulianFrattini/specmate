@@ -16,15 +16,15 @@ public class CommandSplit extends SimpleCommand {
 	}
 
 	@Override
-	public String generateOutput(Fragment fragment) throws Exception {
+	public String generateOutput(Fragment fragment) {
 		ArrayList<Fragment> split = fragment.split();
 		
 		if(split.size() > continuationIndex) {
 			return successor.generateOutput(split.get(continuationIndex));
 		} else if(split.isEmpty()) {
-			throw new IllegalArgumentException("'split'-command produced no split results");
+			System.out.println("ERROR: 'split'-command produced no split results");
 		} else if(split.size() <= continuationIndex) {
-			throw new IllegalArgumentException("'split'-command produced " + split.size() + " continuents, but the continuation index is " + continuationIndex);
+			System.out.println("ERROR: 'split'-command produced " + split.size() + " continuents, but the continuation index is " + continuationIndex);
 		}
 		return null;
 	}

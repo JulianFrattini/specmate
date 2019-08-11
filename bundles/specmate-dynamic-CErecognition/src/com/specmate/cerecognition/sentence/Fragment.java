@@ -35,7 +35,7 @@ public abstract class Fragment {
 	public abstract Leaf getLeafByToken(int beginIndex);
 	
 	// Manipulation
-	public abstract ArrayList<Fragment> split() throws Exception;
+	public abstract ArrayList<Fragment> split();
 	public abstract ArrayList<Fragment> getBy(boolean byType, String indicator, ArrayList<Fragment> selected);
 	public abstract ArrayList<Fragment> select(boolean byType, String indicator, ArrayList<Fragment> selected);
 	

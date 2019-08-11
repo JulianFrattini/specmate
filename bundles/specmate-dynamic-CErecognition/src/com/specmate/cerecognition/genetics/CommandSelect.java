@@ -11,6 +11,13 @@ public class CommandSelect extends SimpleCommand {
 	private String indicator;
 	
 	/*
+	 * Sometimes a fragment tree contains multiple nodes with identical attributes
+	 * (same text and type). In order to identify which fragment to chose, the selector
+	 * can be extended with an index.
+	 */
+	private int index;
+	
+	/*
 	 * Sometimes the content of a CEElement (cause/effect) are not all grouped in
 	 * one exclusive branch of the constituency-tree. In this case, a governing parent
 	 * leaf is chosen which has a reference on all other leaf nodes relevant for the
@@ -27,6 +34,16 @@ public class CommandSelect extends SimpleCommand {
 		super();
 		this.byType = byType;
 		this.indicator = indicator;
+		index = 0;
+		
+		horizontalSelection = new ArrayList<CommandPick>();
+	}
+	
+	public CommandSelect(boolean byType, String indicator, int index) {
+		super();
+		this.byType = byType;
+		this.indicator = indicator;
+		this.index = index;
 		
 		horizontalSelection = new ArrayList<CommandPick>();
 	}
@@ -40,19 +57,18 @@ public class CommandSelect extends SimpleCommand {
 	}
 
 	@Override
-	public String generateOutput(Fragment fragment) throws IllegalArgumentException, Exception {
+	public String generateOutput(Fragment fragment) {
 		ArrayList<Fragment> selected = new ArrayList<Fragment>();
 		fragment.select(byType, indicator, selected);
 
-		if(selected.size() == 1) {
-			Fragment selection = selected.get(0);
+		if(selected.size() > 0) {
+			Fragment selection = selected.get(index);
 			
 			if(successor == null) {
 				if(horizontalSelection.isEmpty()) {
 					return selection.getCoveredText();
 				} else {
 					// horizontal selection is active and CommandPick's have to be resolved
-					
 					String[] result = new String[horizontalSelection.size()+1];
 					
 					for(int i = 0; i < result.length; i++) {
@@ -78,14 +94,14 @@ public class CommandSelect extends SimpleCommand {
 			System.out.println("ERROR: CommandSelect did not identify an eligible result");
 			System.out.println("  Sentence under test: " + fragment.toString(false, false));
 			System.out.println("  Checking for " + (byType ? "type" : "word") + " " + indicator + " yielded no result");
-		} else if(selected.size() > 1) {
+		} /*else if(selected.size() > 1) {
 			System.out.println("ERROR: CommandSelect did identify too many eligible results");
 			System.out.println("  Sentence under test: " + fragment.toString(true, false));
 			System.out.println("  Checking for " + (byType ? "type" : "word") + " " + indicator + " yielded the following result");
 			for(Fragment s : selected) {
 				System.out.println("   - " + s.toString(true, false));
 			}
-		} else {
+		}*/ else {
 			System.out.println("ERROR: CommandSelect yielded an unknown selection error");
 		}
 		

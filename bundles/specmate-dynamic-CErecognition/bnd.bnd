@@ -10,7 +10,8 @@ Export-Package: com.specmate.cerecognition.api
 	specmate-nlp,\
 	specmate-model-gen;version=latest,\
 	specmate-emfjson;version=latest,\
-	org.json;version=latest
+	org.json;version=latest,\
+	com.sun.jersey.json
 Bundle-Version: 0.0.0.${tstamp}
 Import-Package: *
 -privatepackage: \
@@ -19,4 +20,5 @@ Import-Package: *
 	com.specmate.cerecognition.causeeffectgraph,\
 	com.specmate.cerecognition.genetics,\
 	com.specmate.cerecognition.main,\
-	com.specmate.cerecognition.pattern
+	com.specmate.cerecognition.pattern,\
+	com.specmate.cerecognition.trainer

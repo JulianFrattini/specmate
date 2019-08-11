@@ -23,9 +23,9 @@ public class CommandPick extends SimpleCommand {
 	}
 
 	@Override
-	public String generateOutput(Fragment fragment) throws IllegalArgumentException, Exception {
+	public String generateOutput(Fragment fragment) {
 		if(!(fragment instanceof Leaf)) {
-			throw new IllegalArgumentException("Trying to invoke a 'pick'-command on a non-leaf node");
+			System.out.println("ERROR: Attempting to invoke a pick-command on a non-Leaf node");
 		}
 		Leaf leaf = (Leaf) fragment;
 		
@@ -44,7 +44,8 @@ public class CommandPick extends SimpleCommand {
 			}
 		}
 		
-		throw new IllegalArgumentException("No governed leaf node found that complies the given dependency type");
+		System.out.println("ERROR: No governed leaf node found that complies the given dependency type");
+		return "";
 	}
 
 	@Override

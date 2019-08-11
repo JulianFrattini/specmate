@@ -32,6 +32,13 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 		}
 	}
 
+	/**
+	 * Generates a Generator, which extracts the given ce-String from the sentence
+	 * @param sentence The sentence under test
+	 * @param ce The cause- or effect-expression
+	 * @param index The begin index of the word (optionally used when a sentence contains multiple identical leafs (same text and type) in order to differentiate them)
+	 * @return
+	 */
 	private SimpleCauseEffectGenerator generateCommandPattern(ISentence sentence, String ce) {
 		SimpleCommand command = null;
 		
@@ -89,7 +96,8 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 						governingFound = true;
 						
 						// create a command that selects the governing leaf node
-						SimpleCommand selectEligible = generateCommandPattern(sentence, eligibleFragment.getCoveredText()).getCommand();
+						//SimpleCommand selectEligible = generateCommandPattern(sentence, eligibleFragment.getCoveredText(), governorIndex).getCommand();
+						SimpleCommand selectEligible = generateCommandSelector(sentence, governor);
 						
 						//TODO create pickers for the governed leaf nodes
 						for(String other : remainingWordsOfExpression) {
@@ -111,6 +119,43 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 			System.out.println("Unable to generate CauseEffectGenerator");
 			return null;
 		}
+	}
+	
+	private SimpleCommand generateCommandSelector(ISentence sentence, Leaf leaf) {
+		SimpleCommand command = null;
+		
+		ArrayList<Fragment> eligibleByExpression = new ArrayList<Fragment>();
+		sentence.getRoot().getBy(false, leaf.getCoveredText(), eligibleByExpression);
+		
+		int eligibleIndex = 0;
+		if(eligibleByExpression.size() > 1) {
+			for(Fragment eligible : eligibleByExpression) {
+				if(eligible.equals(leaf)) {
+					break;
+				} else {
+					eligibleIndex++;
+				}
+			}
+		}
+		
+		Fragment eligible = eligibleByExpression.get(eligibleIndex);
+		String eligibleType = eligible.getTag();
+		
+		ArrayList<Fragment> eligibleByType = new ArrayList<Fragment>();
+		sentence.getRoot().getBy(true, eligibleType, eligibleByType);
+		
+		if(eligibleByType.size() == 1) {
+			command = new CommandSelect(true, eligibleType); 
+		} else {
+			SimpleCommand splitter = splitUntilSearchIsUnique(
+					sentence.getRoot(),
+					eligibleType,
+					eligible.getCoveredText());
+			command = addCommand(command, splitter);
+			command = addCommand(command, new CommandSelect(true, eligibleType));
+		}
+		
+		return command;
 	}
 	
 	private SimpleCommand splitUntilSearchIsUnique(Fragment current, String tag, String text) {
