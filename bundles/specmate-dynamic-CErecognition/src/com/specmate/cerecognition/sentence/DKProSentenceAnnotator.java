@@ -1,9 +1,11 @@
 package com.specmate.cerecognition.sentence;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.apache.uima.cas.FeatureStructure;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
-import org.osgi.service.component.annotations.Reference;
 
 import com.specmate.cerecognition.util.Globals;
 import com.specmate.common.exception.SpecmateException;
@@ -12,6 +14,7 @@ import com.specmate.nlp.api.INLPService;
 
 import de.tudarmstadt.ukp.dkpro.core.api.segmentation.type.Token;
 import de.tudarmstadt.ukp.dkpro.core.api.syntax.type.constituent.Constituent;
+import de.tudarmstadt.ukp.dkpro.core.api.syntax.type.dependency.Dependency;
 
 public class DKProSentenceAnnotator {	
 	private INLPService nlp = null;
@@ -27,7 +30,7 @@ public class DKProSentenceAnnotator {
 			
 			Constituent topConstituent = JCasUtil.select(processed, Constituent.class).iterator().next();
 			Fragment root = parseFeatureStructure(topConstituent);
-			
+			parseDependencies(root, JCasUtil.select(processed, Dependency.class));
 
 			Sentence sentence = new Sentence(
 					Globals.getInstance().getNewSentenceCounter(), 
@@ -58,6 +61,34 @@ public class DKProSentenceAnnotator {
 		}
 		
 		return f;
+	}
+	
+	/**
+	 * Parses all dependencies from the JCas object into the leaf elements of the sentence
+	 * @param root Root of the parsed sentence
+	 * @param dpc Dependency collection of the JCas object
+	 */
+	private void parseDependencies(Fragment root, Collection<Dependency> dpc) {
+		ArrayList<Leaf> tokenNodes = root.getAllLeafs();
+		ArrayList<Dependency> dependencies = new ArrayList<Dependency>(dpc);
+		
+		for(int i = 0; i < tokenNodes.size(); i++) {
+			Leaf fragment = tokenNodes.get(i);
+			Dependency dependency = dependencies.get(i);
+			
+			if(fragment.getCoveredText().contentEquals(dependency.getDependent().getCoveredText())) {
+				int governorIndex = dependency.getGovernor().getBegin();
+				Leaf governor = root.getLeafByToken(governorIndex);
+
+				fragment.setDependencyRelationType(dependency.getDependencyType());
+				if(!dependency.getDependencyType().equals("ROOT")) {
+					// do not create a recursive root-relation
+					fragment.setGovernor(governor);
+				}
+			} else {
+				// error case: the sentence's leafs and list of dependency tokens do not align
+			}
+		}
 	}
 	
 	/*public Sentence createSentence(int index, String text) {

@@ -20,7 +20,19 @@ public class SimpleCauseEffectGraph implements ICauseEffectGraph {
 
 	@Override
 	public boolean equals(ICauseEffectGraph other) {
-		return (cause.equals(other.getCause()) && effect.equals(other.getEffect()));
+		if(!cause.equals(other.getCause())) {
+			System.out.println("ERROR: The causes do not align:");
+			System.out.println("\t" + cause);
+			System.out.println("\t" + other.getCause());
+			return false;
+		}
+		if(!effect.equals(other.getEffect())) {
+			System.out.println("ERROR: The effects do not align:");
+			System.out.println("\t" + effect);
+			System.out.println("\t" + other.getEffect());
+			return false;
+		}
+		return true;
 	}
 	
 	@Override

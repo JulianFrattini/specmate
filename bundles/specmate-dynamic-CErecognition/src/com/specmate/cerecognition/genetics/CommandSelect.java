@@ -76,14 +76,14 @@ public class CommandSelect extends SimpleCommand {
 			}
 		} else if(selected.size() == 0) {
 			System.out.println("ERROR: CommandSelect did not identify an eligible result");
-			System.out.println("  Sentence under test: " + fragment.toString(false));
+			System.out.println("  Sentence under test: " + fragment.toString(false, false));
 			System.out.println("  Checking for " + (byType ? "type" : "word") + " " + indicator + " yielded no result");
 		} else if(selected.size() > 1) {
 			System.out.println("ERROR: CommandSelect did identify too many eligible results");
-			System.out.println("  Sentence under test: " + fragment.toString(true));
+			System.out.println("  Sentence under test: " + fragment.toString(true, false));
 			System.out.println("  Checking for " + (byType ? "type" : "word") + " " + indicator + " yielded the following result");
 			for(Fragment s : selected) {
-				System.out.println("   - " + s.toString(true));
+				System.out.println("   - " + s.toString(true, false));
 			}
 		} else {
 			System.out.println("ERROR: CommandSelect yielded an unknown selection error");
@@ -98,9 +98,9 @@ public class CommandSelect extends SimpleCommand {
 		
 		sb.append("select " + (byType ? "type" : "word") + " " + indicator);
 		
-		if(horizontalSelection.isEmpty()) {
+		if(!horizontalSelection.isEmpty()) {
 			StringJoiner sj = new StringJoiner(" & ");
-			horizontalSelection.forEach(picker -> sj.add(sj.toString()));
+			horizontalSelection.forEach(picker -> sj.add(picker.toString()));
 			sb.append(" (" + sj.toString() + ")");
 		}
 		

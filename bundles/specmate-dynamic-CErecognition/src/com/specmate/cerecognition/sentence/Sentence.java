@@ -34,6 +34,6 @@ public class Sentence implements ISentence {
 	
 	@Override
 	public String toString() {
-		return index + ": " + root.toString();
+		return index + ": " + root.toString(false, false);
 	}
 }

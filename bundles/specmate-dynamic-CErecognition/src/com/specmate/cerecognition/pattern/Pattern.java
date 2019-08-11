@@ -55,9 +55,9 @@ public class Pattern implements IPattern {
 	 */
 	public boolean checkCompliance(ISentence candidate) {
 		//IStructure candidateStructure = candidate.generateStructure();
-		System.out.println("Checking compliance of sentence");
-		System.out.println("\t" + candidate.getRoot().toString(true));
-		System.out.println("\t" + sentenceStructure.toString());
+		/*System.out.println("Checking compliance of sentence");
+		System.out.println("\t" + candidate.getRoot().toString(true, false));
+		System.out.println("\t" + sentenceStructure.toString());*/
 		if(sentenceStructure.compliedBy(candidate.getRoot())) {
 			return true;
 		}

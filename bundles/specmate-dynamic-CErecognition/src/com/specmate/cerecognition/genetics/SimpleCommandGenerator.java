@@ -25,7 +25,11 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 		SimpleCauseEffectGenerator causeGenerator = generateCommandPattern(sentence, simpleCE.getCause());
 		SimpleCauseEffectGenerator effectGenerator = generateCommandPattern(sentence, simpleCE.getEffect());
 
-		return new SimpleCauseEffectPattern(causeGenerator, effectGenerator);
+		if(causeGenerator == null || effectGenerator == null) {
+			return null;
+		} else {
+			return new SimpleCauseEffectPattern(causeGenerator, effectGenerator);
+		}
 	}
 
 	private SimpleCauseEffectGenerator generateCommandPattern(ISentence sentence, String ce) {
@@ -101,8 +105,12 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 			}
 		}
 		
-		//TODO catch empty command objects
-		return new SimpleCauseEffectGenerator(command);
+		if(command != null) {
+			return new SimpleCauseEffectGenerator(command);
+		} else {
+			System.out.println("Unable to generate CauseEffectGenerator");
+			return null;
+		}
 	}
 	
 	private SimpleCommand splitUntilSearchIsUnique(Fragment current, String tag, String text) {
@@ -162,10 +170,13 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 	}
 	
 	private CommandPick generateCommandPickFor(Leaf leaf, String governed) {
-		for(Leaf gov : leaf.getGoverned()) {
+		for(Leaf gov : leaf.getGoverned()) {		
 			if(gov.getCoveredText().contentEquals(governed)) {
-				return new CommandPick(gov.getDependencyRelationType());
-			}
+				String dependencyRelationType = gov.getDependencyRelationType();
+				int index = gov.getNumberOfDependencyRelationOccurrencesBeforeThis();
+				
+				return new CommandPick(dependencyRelationType, index);
+			} 
 		}
 		
 		// transitive approach, as the current node does not directly govern the relevant node

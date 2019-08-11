@@ -37,6 +37,27 @@ public class Node extends Fragment {
 		
 		return parenting;
 	}
+
+	public ArrayList<Leaf> getAllLeafs() {
+		ArrayList<Leaf> result = new ArrayList<Leaf>();
+		
+		for(Fragment child : children) {
+			result.addAll(child.getAllLeafs());
+		}
+		
+		return result;
+	}
+	
+	// Optimize by index
+	public Leaf getLeafByToken(int beginIndex) {
+		for(Fragment child : children) {
+			Leaf result = child.getLeafByToken(beginIndex);
+			if(result != null) {
+				return result;
+			}
+		}
+		return null;
+	}
 	
 	@Override
 	public StructureElement generateStructure() {
@@ -110,16 +131,16 @@ public class Node extends Fragment {
 	}
 	
 	@Override
-	public String toString(boolean structurized) {
+	public String toString(boolean structurized, boolean dependencies) {
 		if(structurized) {
 			StringJoiner sj = new StringJoiner("");
 			sj.add("(" + super.getTag() + "){");
-			children.forEach(c -> sj.add(c.toString(true)));
+			children.forEach(c -> sj.add(c.toString(true, dependencies)));
 			sj.add("}");
 			return sj.toString();
 		} else {
 			StringJoiner sj = new StringJoiner(" ");
-			children.forEach(c -> sj.add(c.toString(false)));
+			children.forEach(c -> sj.add(c.toString(false, dependencies)));
 			return sj.toString();
 		}
 	}

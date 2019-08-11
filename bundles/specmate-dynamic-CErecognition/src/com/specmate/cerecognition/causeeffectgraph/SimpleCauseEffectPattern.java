@@ -20,4 +20,11 @@ public class SimpleCauseEffectPattern implements ICauseEffectPattern {
 				generateEffect.generateCEElement(sentence.getRoot()));
 	}
 
+	public String getCommandString(boolean cause) {
+		if(cause) {
+			return generateCause.toString();
+		} else {
+			return generateEffect.toString();
+		}
+	}
 }

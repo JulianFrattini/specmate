@@ -16,6 +16,11 @@ public class SimpleCauseEffectGenerator {
 	}
 	
 	public String generateCEElement(Fragment fragment) {
+		if(command == null) {
+			System.out.println("ERROR: Command is null!");
+			return null;
+		}
+		
 		try {
 			return command.generateOutput(fragment);
 		} catch (IllegalArgumentException e) {
@@ -26,5 +31,9 @@ public class SimpleCauseEffectGenerator {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public String toString() {
+		return command.toString();
 	}
 }

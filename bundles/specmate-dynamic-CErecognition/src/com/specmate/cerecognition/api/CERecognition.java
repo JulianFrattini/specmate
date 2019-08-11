@@ -85,12 +85,18 @@ public class CERecognition extends RestServiceBase  {
 		JSONArray array = new JSONArray();
 		
 		for(IPattern pattern : main.getPatterns()) {
-			JSONObject o = new JSONObject();
+			JSONObject patternObject = new JSONObject();
 			
-			o.put("index", pattern.getIndex());
-			o.put("structure", pattern.getStructure().toString());
+			patternObject.put("index", pattern.getIndex());
+			patternObject.put("structure", pattern.getStructure().toString());
 			
-			array.put(o);
+			JSONObject generationCommands = new JSONObject();
+			generationCommands.put("cause", pattern.getGenerationPattern().getCommandString(true));
+			generationCommands.put("effect", pattern.getGenerationPattern().getCommandString(false));
+			
+			patternObject.put("generation", generationCommands);
+			
+			array.put(patternObject);
 		}
 		
 		return array;

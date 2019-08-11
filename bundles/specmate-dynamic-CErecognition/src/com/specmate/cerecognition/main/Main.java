@@ -30,6 +30,7 @@ public class Main implements ICauseEffectTrainer{
 	public void start() {
 		train("It rains because of the humidity.", "humidity", "rains");
 		train("It is warm because of the sun.", "sun", "warm");
+		train("If an error message is shown, the user can choose to recover the last stable build.", "an error message is shown", "the user can choose to recover the last stable build");
 	}
 	
 	public Main() {
@@ -108,6 +109,11 @@ public class Main implements ICauseEffectTrainer{
 	
 	public boolean checkPatternCompliance(ISentence sentence, ICauseEffectPattern pattern, ICauseEffectGraph ceg) {
 		ICauseEffectGraph generated = pattern.generateGraphFromSentence(sentence);
+		
+		/*System.out.println("Checking pattern compliance between CEG's of " + sentence.toString());
+		System.out.println("  - given: '" + ceg.getCause() + "' -> '" + ceg.getEffect() + "'");
+		System.out.println("  - generated: '" + generated.getCause() + "' -> '" + generated.getEffect() + "'");*/
+		
 		return generated.equals(ceg);
 	}
 	

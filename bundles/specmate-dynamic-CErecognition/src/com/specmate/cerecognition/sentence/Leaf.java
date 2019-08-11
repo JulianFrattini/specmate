@@ -10,7 +10,7 @@ public class Leaf extends Fragment {
 
 	private Token reference;
 	
-	private Leaf governer;
+	private Leaf governor;
 	private ArrayList<Leaf> governed;
 	private String dependencyRelationType;
 	
@@ -21,7 +21,6 @@ public class Leaf extends Fragment {
 		governed = new ArrayList<Leaf>();
 	}
 
-
 	public Token getReference() {
 		return reference;
 	}
@@ -30,12 +29,13 @@ public class Leaf extends Fragment {
 		this.reference = reference;
 	}
 	
-	public Leaf getGoverner() {
-		return governer;
+	public Leaf getGovernor() {
+		return governor;
 	}
 
-	public void setGoverner(Leaf governer) {
-		this.governer = governer;
+	public void setGovernor(Leaf governer) {
+		this.governor = governer;
+		governer.addGoverned(this);
 	}
 
 	public ArrayList<Leaf> getGoverned() {
@@ -56,7 +56,7 @@ public class Leaf extends Fragment {
 	
 	public boolean isGoverningAll(ArrayList<String> others) {
 		for(String other : others) {
-			if(!isGoverning(other, false)) {
+			if(!isGoverning(other)) {
 				return false;
 			}
 		}
@@ -64,25 +64,38 @@ public class Leaf extends Fragment {
 		return true;
 	}
 	
-	private boolean isGoverning(String other, boolean transitive) {
+	public boolean isGoverning(String other) {
 		for(Leaf gov : governed) {
-			if(gov.getCoveredText().contentEquals(other)) {
+			if(gov.getCoveredText().equals(other)) {
 				return true;
-			}
-		}
-		
-		// TODO check if transitivity is necessary and fully used
-		// transitive relation: check if one of the govened is governing the searched for string
-		if(transitive) {
-			for(Leaf gov : governed) {
-				if(!gov.getCoveredText().contentEquals(other)) {
-					if(gov.isGoverning(other, true)) 
+			} else {
+				if(!gov.getCoveredText().contentEquals(getCoveredText())) {
+					if(gov.isGoverning(other)) {
 						return true;
+					}
+				} else {
+					return false;
 				}
 			}
 		}
 		
 		return false;
+	}
+	
+	public int getNumberOfDependencyRelationOccurrencesBeforeThis() {
+		int result = 0; 
+		
+		for(Leaf gov : governor.getGoverned()) {
+			if(gov.equals(this)) {
+				break;
+			} else {
+				if(gov.getDependencyRelationType().equals(dependencyRelationType)) {
+					result = result + 1;
+				}
+			}
+		}
+		
+		return result;
 	}
 
 	@Override
@@ -91,6 +104,19 @@ public class Leaf extends Fragment {
 	}
 	
 	public ArrayList<Fragment> getChildren() {
+		return null;
+	}
+	
+	public ArrayList<Leaf> getAllLeafs() {
+		ArrayList<Leaf> result = new ArrayList<Leaf>();
+		result.add(this);
+		return result;
+	}
+	
+	public Leaf getLeafByToken(int beginIndex) {
+		if(reference.getBegin() == beginIndex) {
+			return this;
+		}
 		return null;
 	}
 	
@@ -128,11 +154,24 @@ public class Leaf extends Fragment {
 	}
 
 	@Override
-	public String toString(boolean structurized) {
+	public String toString(boolean structurized, boolean dependencies) {
+		String result = super.getCoveredText();
+		
 		if(structurized) {
-			return super.getCoveredText() + " (" + super.getTag() + ")";
-		} else {
-			return super.getCoveredText();
+			result = result + " (" + super.getTag() + ")";
 		}
+		if(dependencies) {
+			if(dependencyRelationType != null && governor != null) {
+				result = result + " [--" + dependencyRelationType + "-> " + governor.getCoveredText() + "]";
+			} else {
+				if(dependencyRelationType.equals("ROOT")) {
+					result = result + " [--> ROOT]";
+				} else {
+					result = result + " [no dependency]";
+				}
+			}
+		}
+		
+		return result;
 	}
 }

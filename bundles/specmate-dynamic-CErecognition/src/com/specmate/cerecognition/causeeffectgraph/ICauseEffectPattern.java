@@ -4,4 +4,6 @@ import com.specmate.cerecognition.sentence.ISentence;
 
 public interface ICauseEffectPattern {
 	public ICauseEffectGraph generateGraphFromSentence(ISentence sentence);
+	
+	public String getCommandString(boolean cause);
 }

@@ -6,10 +6,20 @@ import com.specmate.cerecognition.sentence.Leaf;
 public class CommandPick extends SimpleCommand {
 	
 	private String dependencyType;
+	
+	// if one leaf governs multiple leafs with the same dependency type, enable an indexed picking
+	private int index;
 
 	public CommandPick(String dependencyType) {
 		super();
 		this.dependencyType = dependencyType;
+		index = 0;
+	}
+	
+	public CommandPick(String dependencyType, int index) {
+		super();
+		this.dependencyType = dependencyType;
+		this.index = index;
 	}
 
 	@Override
@@ -19,12 +29,17 @@ public class CommandPick extends SimpleCommand {
 		}
 		Leaf leaf = (Leaf) fragment;
 		
+		int countOccurrencesOfDependencyType = 0;
 		for(Leaf gov : leaf.getGoverned()) {
 			if(gov.getDependencyRelationType().contentEquals(dependencyType)) {
-				if(successor == null) {
-					return gov.getCoveredText();
+				if(countOccurrencesOfDependencyType == index) {
+					if(successor == null) {
+						return gov.getCoveredText();
+					} else {
+						return successor.generateOutput(gov);
+					}
 				} else {
-					return successor.generateOutput(gov);
+					countOccurrencesOfDependencyType++;
 				}
 			}
 		}
