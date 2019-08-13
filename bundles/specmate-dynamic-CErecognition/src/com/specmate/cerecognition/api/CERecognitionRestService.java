@@ -1,7 +1,6 @@
 package com.specmate.cerecognition.api;
 
 import java.util.StringJoiner;
-import java.util.logging.Logger;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -18,7 +17,6 @@ import com.specmate.cerecognition.util.CELogger;
 import com.specmate.common.exception.SpecmateException;
 import com.specmate.emfrest.api.IRestService;
 import com.specmate.emfrest.api.RestServiceBase;
-import com.specmate.model.base.BasePackage;
 import com.specmate.model.base.Folder;
 import com.specmate.model.base.IContentElement;
 import com.specmate.rest.RestResult;

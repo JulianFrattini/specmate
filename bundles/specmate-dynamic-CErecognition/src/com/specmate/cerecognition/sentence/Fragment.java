@@ -37,7 +37,9 @@ public abstract class Fragment {
 	// Manipulation
 	public abstract ArrayList<Fragment> split();
 	public abstract ArrayList<Fragment> getBy(boolean byType, String indicator, ArrayList<Fragment> selected);
+	public abstract ArrayList<Leaf> getLeafs(boolean byType, String indicator, ArrayList<Leaf> selected);
 	public abstract ArrayList<Fragment> select(boolean byType, String indicator, ArrayList<Fragment> selected);
+	public abstract boolean contains(boolean byType, String indicator);
 	
 	// General
 	public abstract String toString(boolean structurized, boolean dependencies);

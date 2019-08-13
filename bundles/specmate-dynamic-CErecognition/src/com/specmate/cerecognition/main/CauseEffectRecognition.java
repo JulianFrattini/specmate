@@ -13,6 +13,7 @@ import com.specmate.cerecognition.causeeffectgraph.SimpleCauseEffectGraph;
 import com.specmate.cerecognition.genetics.ICommandGenerator;
 import com.specmate.cerecognition.genetics.SimpleCommandGenerator;
 import com.specmate.cerecognition.pattern.IPattern;
+import com.specmate.cerecognition.pattern.IStructure;
 import com.specmate.cerecognition.pattern.Pattern;
 import com.specmate.cerecognition.sentence.DKProSentenceAnnotator;
 import com.specmate.cerecognition.sentence.ISentence;
@@ -134,9 +135,49 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 			} else {
 				// the sentence erroneously complies with the pattern
 				CELogger.log().warn("The found pattern does not generate the right CEG");
-				// TODO improve pattern strictness
 				
-				result = CauseEffectRecognitionResult.RECOGNITION_FAILED;
+				if(cause.isEmpty() && effect.isEmpty()) {
+					// intruding sentence
+					boolean deflectionSuccessful = patternFound.deflectIntruder(sen);
+				
+					if(deflectionSuccessful) {
+						result = CauseEffectRecognitionResult.DEFLECTION_SUCCESSFUL;
+					} else {
+						result = CauseEffectRecognitionResult.DEFLECTION_FAILED;
+					}
+				} else {
+					// pattern has to be split in two
+					IStructure otherStructure = patternFound.differentiateSimilar(sen);
+					
+					if(otherStructure != null) {
+						ICauseEffectPattern newPattern = generator.generateCommandPatterns(sen, ceg);
+						
+						if(newPattern != null) {
+							if(checkPatternCompliance(sen, newPattern, ceg)) {
+								IPattern fullPattern = new Pattern(Globals.getInstance().getNewPatternCounter(),
+										otherStructure,
+										newPattern);
+								fullPattern.addSentence(sen);
+								
+								patterns.add(fullPattern);
+								result = CauseEffectRecognitionResult.SPLITTING_SUCCESSFUL;
+							} else {
+								CELogger.log().warn("The new cause effect pattern does not generate the correct CEG");
+								CELogger.log().warn("  Structure: " + sen.getRoot().toString(true, true));
+								CELogger.log().warn("  Generation: ");
+								CELogger.log().warn("   - Cause: " + newPattern.getCommandString(true));
+								CELogger.log().warn("   - Effect: " + newPattern.getCommandString(false));
+								result = CauseEffectRecognitionResult.CREATION_FAILED;
+							}
+						} else {
+							CELogger.log().warn("The cause effect generator did not generate a new pattern!");
+
+							result = CauseEffectRecognitionResult.CREATION_FAILED;
+						}
+					} else {
+						result = CauseEffectRecognitionResult.SPLITTING_FAILED;
+					}
+				}
 			}
 		}
 		

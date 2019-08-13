@@ -81,11 +81,20 @@ public class Node extends Fragment {
 			selected.add(this);
 		} else if(!byType && toString().equals(indicator)) {
 			selected.add(this);
-			return selected;
+			//return selected;
 		}
 		
 		for(Fragment child : children) {
-			child.select(byType, indicator, selected);
+			child.getBy(byType, indicator, selected);
+		}
+		
+		return selected;
+	}
+	
+	@Override 
+	public ArrayList<Leaf> getLeafs(boolean byType, String indicator, ArrayList<Leaf> selected) {
+		for(Fragment child : children) {
+			child.getLeafs(byType, indicator, selected);
 		}
 		
 		return selected;
@@ -106,6 +115,22 @@ public class Node extends Fragment {
 		}
 		
 		return selected;
+	}
+	
+	@Override
+	public boolean contains(boolean byType, String indicator) {
+		if(byType && super.getTag().equals(indicator)) {
+			return true;
+		} else if(!byType && super.getCoveredText().equals(indicator)) {
+			return true;
+		}
+		
+		for(Fragment child : children) {
+			if(child.contains(byType, indicator)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -128,6 +153,11 @@ public class Node extends Fragment {
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return super.getCoveredText();
 	}
 	
 	@Override

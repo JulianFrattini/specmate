@@ -28,7 +28,14 @@ public class CommandPick extends SimpleCommand {
 		if(!(fragment instanceof Leaf)) {
 			CELogger.log().warn("Attempting to invoke a pick-command on a non-Leaf node");
 		}
-		Leaf leaf = (Leaf) fragment;
+		
+		Leaf leaf = null;
+		if(fragment instanceof Leaf) {
+			leaf = (Leaf) fragment;
+		} else {
+			CELogger.log().error("CommandPick invoked on a non-Leaf node");
+			CELogger.log().error(toString() + " on " + fragment.toString());
+		}
 		
 		int countOccurrencesOfDependencyType = 0;
 		for(Leaf gov : leaf.getGoverned()) {

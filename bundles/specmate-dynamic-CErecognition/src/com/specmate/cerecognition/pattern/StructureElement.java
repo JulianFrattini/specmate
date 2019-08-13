@@ -1,18 +1,20 @@
 package com.specmate.cerecognition.pattern;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.StringJoiner;
 
 import com.specmate.cerecognition.sentence.Fragment;
 import com.specmate.cerecognition.sentence.Node;
 
 public class StructureElement {
-	private Collection<StructureElement> children;
+	private ArrayList<StructureElement> children;
 	
 	private String tag;
-	private Collection<String> keywords_whitelist;
-	private Collection<String> keywords_blacklist;
+	private ArrayList<String> keywords_whitelist;
+	private ArrayList<String> keywords_blacklist;
+	
+	// this list is an intermediate memory for the keyword generation process
+	private ArrayList<String> proposedKeywords;
 	
 	public StructureElement(String tag) {
 		this.tag = tag;
@@ -20,9 +22,11 @@ public class StructureElement {
 		children = new ArrayList<StructureElement>();
 		keywords_whitelist = new ArrayList<String>();
 		keywords_blacklist = new ArrayList<String>();
+		
+		proposedKeywords = new ArrayList<String>();
 	}
 
-	public Collection<StructureElement> getChildren() {
+	public ArrayList<StructureElement> getChildren() {
 		return children;
 	}
 
@@ -38,7 +42,7 @@ public class StructureElement {
 		this.tag = tag;
 	}
 
-	public Collection<String> getKeywords_whitelist() {
+	public ArrayList<String> getKeywords_whitelist() {
 		return keywords_whitelist;
 	}
 
@@ -50,10 +54,18 @@ public class StructureElement {
 		}
 	}
 
-	public Collection<String> getKeywords_blacklist() {
+	public ArrayList<String> getKeywords_blacklist() {
 		return keywords_blacklist;
 	}
 	
+	public ArrayList<String> getProposedKeywords() {
+		return proposedKeywords;
+	}
+
+	public void addProposedKeywords(String proposedKeyword) {
+		proposedKeywords.add(proposedKeyword);
+	}
+
 	/**
 	 * Checks whether a given fragment complies this structure element
 	 * @param fragment The fragment of a sentence to be compares
@@ -156,11 +168,44 @@ public class StructureElement {
 		return sb.toString();
 	}
 	
-	private String getKeywordString(Collection<String> list) {
+	private String getKeywordString(ArrayList<String> list) {
 		StringJoiner sj = new StringJoiner(";");
 		
 		list.forEach(item -> sj.add(item));
 		
 		return sj.toString();
+	}
+	
+	public StructureElement clone() {
+		StructureElement clone = new StructureElement(this.tag);
+		
+		for(String keyword : keywords_whitelist) {
+			clone.addKeyword(keyword, true);
+		}
+		for(String keyword : keywords_blacklist) {
+			clone.addKeyword(keyword, false);
+		}
+		for(String keyword : proposedKeywords) {
+			clone.addProposedKeywords(keyword);
+		}
+		
+		for(StructureElement child : children) {
+			clone.addChild(child.clone());
+		}
+		
+		return clone;
+	}
+	
+	public void blacklistAllProposed() {
+		if(!proposedKeywords.isEmpty()) {
+			for(String keyword : proposedKeywords) {
+				keywords_blacklist.add(keyword);
+			}
+			proposedKeywords.clear();
+		}
+		
+		for(StructureElement child : children) {
+			child.blacklistAllProposed();
+		}
 	}
 }

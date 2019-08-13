@@ -143,6 +143,26 @@ public class Leaf extends Fragment {
 	}
 	
 	@Override
+	public ArrayList<Leaf> getLeafs(boolean byType, String indicator, ArrayList<Leaf> selected) {
+		if(byType && super.getTag().equals(indicator)) {
+			selected.add(this);
+		} else if(!byType && super.getCoveredText().equals(indicator)) {
+			selected.add(this);
+		}
+		return selected;
+	}
+	
+	@Override
+	public boolean contains(boolean byType, String indicator) {
+		if(byType && super.getTag().equals(indicator)) {
+			return true;
+		} else if(!byType && super.getCoveredText().equals(indicator)) {
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
 	public boolean equals(Fragment other) {
 		if(other instanceof Leaf) {
 			if(super.getTag().equals(other.getTag()) && 
@@ -151,6 +171,11 @@ public class Leaf extends Fragment {
 			}
 		}
 		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return super.getCoveredText();
 	}
 
 	@Override

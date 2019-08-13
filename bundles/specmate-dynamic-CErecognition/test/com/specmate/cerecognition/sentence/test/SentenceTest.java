@@ -1,11 +1,11 @@
 package com.specmate.cerecognition.sentence.test;
 
-import static org.junit.jupiter.api.Assertions.*;
+/*import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
 import com.specmate.cerecognition.sentence.DKProSentenceAnnotator;
-import com.specmate.cerecognition.sentence.Sentence;
+import com.specmate.cerecognition.sentence.Sentence;*/
 
 class SentenceTest {
 

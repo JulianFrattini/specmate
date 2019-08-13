@@ -44,7 +44,7 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 		SimpleCommand command = null;
 		
 		ArrayList<Fragment> eligibleByExpression = new ArrayList<Fragment>();
-		sentence.getRoot().getBy(false, ce, eligibleByExpression);
+		sentence.getRoot().select(false, ce, eligibleByExpression);
 		
 		if(eligibleByExpression.size() == 1) {
 			// exactly one node in the constituency tree matches the given text
@@ -84,8 +84,8 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 			String[] wordsOfExpression = ce.split(" ");
 			for(String word : wordsOfExpression) {
 				// for each word of the expression: check if all other words have a reference to this word
-				ArrayList<Fragment> set = new ArrayList<Fragment>();
-				sentence.getRoot().getBy(false, word, set);
+				ArrayList<Leaf> set = new ArrayList<Leaf>();
+				sentence.getRoot().getLeafs(false, word, set);
 				
 				// words used in the expression can appear multiple times, but only the one belonging to the expression is possibly governing
 				for(Fragment eligibleFragment : set) {
@@ -126,8 +126,8 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 	private SimpleCommand generateCommandSelector(ISentence sentence, Leaf leaf) {
 		SimpleCommand command = null;
 		
-		ArrayList<Fragment> eligibleByExpression = new ArrayList<Fragment>();
-		sentence.getRoot().getBy(false, leaf.getCoveredText(), eligibleByExpression);
+		ArrayList<Leaf> eligibleByExpression = new ArrayList<Leaf>();
+		sentence.getRoot().getLeafs(false, leaf.getCoveredText(), eligibleByExpression);
 		
 		int eligibleIndex = 0;
 		if(eligibleByExpression.size() > 1) {
