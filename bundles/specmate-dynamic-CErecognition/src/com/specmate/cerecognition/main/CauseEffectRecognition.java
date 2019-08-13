@@ -19,6 +19,8 @@ import com.specmate.cerecognition.sentence.ISentence;
 import com.specmate.cerecognition.trainer.JSONCausalityExampleReader;
 import com.specmate.cerecognition.trainer.CauseEffectTrainer;
 import com.specmate.cerecognition.trainer.ICausalityExampleReader;
+import com.specmate.cerecognition.util.CELogger;
+import com.specmate.cerecognition.util.Configuration;
 import com.specmate.cerecognition.util.Globals;
 import com.specmate.nlp.api.INLPService;
 
@@ -66,15 +68,18 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 	}
 	
 	@Override
-	public IPattern train(String sentence, String cause, String effect) {
-		System.out.println("Training the sentence \"" + sentence + "\"");
+	public CauseEffectRecognitionResult train(String sentence, String cause, String effect) {
+		CauseEffectRecognitionResult result = null;
+		
+		CELogger.log().info("Training the sentence \"" + sentence + "\"");
 		if(!cause.isEmpty() && !effect.isEmpty()) {
-			System.out.println(" " + cause + " -> " + effect);
+			CELogger.log().info(" Causal relation: " + cause + " -> " + effect);
 		}
 		
 		ISentence sen = annotator.createSentence(sentence);
 		ICauseEffectGraph ceg = new SimpleCauseEffectGraph(cause, effect);
-		
+
+		CELogger.log().info("Searching for a pattern complying the sentence's structure");
 		IPattern patternFound = null;
 		for(IPattern pattern : patterns) {
 			if(pattern.checkCompliance(sen)) {
@@ -82,73 +87,69 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 				break;
 			}
 		}
-		
 		if(patternFound == null) {
-			System.out.print("Found no pattern ... ");
+			CELogger.log().info("Found no pattern ... ");
 			// no existing pattern found, creating a new one
 			if(!cause.isEmpty() && !effect.isEmpty()) {
-				System.out.println("generating a new one!");
+				CELogger.log().info("generating a new one!");
 				
 				ICauseEffectPattern newPattern = generator.generateCommandPatterns(sen, ceg);
 				
 				if(newPattern != null) {
 					if(checkPatternCompliance(sen, newPattern, ceg)) {
-						System.out.println("All correct!");
+						CELogger.log().info("Pattern creation successful and correct.");
 						IPattern fullPattern = new Pattern(Globals.getInstance().getNewPatternCounter(),
 								sen.generateStructure(),
 								newPattern);
 						fullPattern.addSentence(sen);
 						
 						patterns.add(fullPattern);
-						System.out.println("------------------------------");
-						return fullPattern;
+						result = CauseEffectRecognitionResult.CREATION_SUCCESSFUL;
 					} else {
-						System.out.println("ERROR: the new cause effect pattern does not generate the correct CEG");
-						System.out.println("  Structure: " + sen.getRoot().toString(true, true));
-						System.out.println("  Generation: ");
-						System.out.println("   - Cause: " + newPattern.getCommandString(true));
-						System.out.println("   - Effect: " + newPattern.getCommandString(false));
-						System.out.println("------------------------------");
-						return null;
+						CELogger.log().warn("The new cause effect pattern does not generate the correct CEG");
+						CELogger.log().warn("  Structure: " + sen.getRoot().toString(true, true));
+						CELogger.log().warn("  Generation: ");
+						CELogger.log().warn("   - Cause: " + newPattern.getCommandString(true));
+						CELogger.log().warn("   - Effect: " + newPattern.getCommandString(false));
+						result = CauseEffectRecognitionResult.CREATION_FAILED;
 					}
 				} else {
-					System.out.println("ERROR: the cause effect generator did not generate a new pattern!");
+					CELogger.log().warn("The cause effect generator did not generate a new pattern!");
 
-					System.out.println("------------------------------");
-					return null;
+					result = CauseEffectRecognitionResult.CREATION_FAILED;
 				}
 			} else {
-				System.out.println("correctly!");
-				System.out.println("------------------------------");
+				CELogger.log().info("correctly!");
+				result = CauseEffectRecognitionResult.DISCARDING_SUCCESSFUL;
 			}
 		} else {
-			System.out.println("Found a complying pattern :");
-			System.out.println(patternFound.toString());
+			CELogger.log().info("Found a complying pattern :");
+			CELogger.log().info(patternFound.toString());
 			// existing pattern found
 			if(patternFound.checkSentenceCompliance(sen, ceg)) {
-				System.out.println("Pattern found and correctly complied!");
-				System.out.println("------------------------------");
+				CELogger.log().info("Pattern found and correctly complied!");
 				patternFound.addSentence(sen);
-				return patternFound;
+				
+				result = CauseEffectRecognitionResult.RECOGNITION_SUCCESSFUL;
 			} else {
 				// the sentence erroneously complies with the pattern
-				System.out.println("ERROR: the found pattern does not generate the right CEG");
-				System.out.println("------------------------------");
+				CELogger.log().warn("The found pattern does not generate the right CEG");
 				// TODO improve pattern strictness
 				
-				return null;
+				result = CauseEffectRecognitionResult.RECOGNITION_FAILED;
 			}
 		}
 		
-		return null;
+		CELogger.log().info("---------------------------------");
+		return result;
 	}
 	
 	public boolean checkPatternCompliance(ISentence sentence, ICauseEffectPattern pattern, ICauseEffectGraph ceg) {
 		ICauseEffectGraph generated = pattern.generateGraphFromSentence(sentence);
 		
-		System.out.println("Checking pattern compliance between CEG's of " + sentence.toString());
-		System.out.println("  - given: '" + ceg.getCause() + "' -> '" + ceg.getEffect() + "'");
-		System.out.println("  - generated: '" + generated.getCause() + "' -> '" + generated.getEffect() + "'");
+		CELogger.log().info("Checking pattern compliance between CEG's of " + sentence.toString());
+		CELogger.log().info("  - given: '" + ceg.getCause() + "' -> '" + ceg.getEffect() + "'");
+		CELogger.log().info("  - generated: '" + generated.getCause() + "' -> '" + generated.getEffect() + "'");
 		
 		return generated.equals(ceg);
 	}

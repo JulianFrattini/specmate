@@ -11,7 +11,8 @@ Export-Package: com.specmate.cerecognition.api
 	specmate-model-gen;version=latest,\
 	specmate-emfjson;version=latest,\
 	org.json;version=latest,\
-	com.sun.jersey.json
+	com.sun.jersey.json,\
+	org.eclipse.emf.common
 Bundle-Version: 0.0.0.${tstamp}
 Import-Package: *
 -privatepackage: \

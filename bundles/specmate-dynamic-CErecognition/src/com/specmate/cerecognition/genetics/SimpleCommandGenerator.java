@@ -10,6 +10,7 @@ import com.specmate.cerecognition.causeeffectgraph.SimpleCauseEffectPattern;
 import com.specmate.cerecognition.sentence.Fragment;
 import com.specmate.cerecognition.sentence.ISentence;
 import com.specmate.cerecognition.sentence.Leaf;
+import com.specmate.cerecognition.util.CELogger;
 import com.specmate.cerecognition.util.StringUtils;
 
 public class SimpleCommandGenerator implements ICommandGenerator {
@@ -69,16 +70,15 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 			}
 		} else if(eligibleByExpression.size() > 1) {
 			// TODO more than one node eligible when searching for the given expression
-			System.out.println("ERROR: More than one node eligible when searching for the expression '" + ce + "'");
-			System.out.println("  Sentence under test: " + sentence.toString());
+			CELogger.log().info("More than one node eligible when searching for the expression '" + ce + "'");
+			CELogger.log().info("  Sentence under test: " + sentence.toString());
 			for(Fragment eligible : eligibleByExpression) {
-				System.out.println("  - " + eligible.toString());
+				CELogger.log().info("  - " + eligible.toString());
 			}
 		} else if(eligibleByExpression.size() == 0) {
 			// no node in the tree of constituents exclusively contains the full expression
 			// horizontal approach: find one governing leaf among the nodes that make up the expression
 			
-			// TODO end loop once governing is found
 			boolean governingFound = false;
 			
 			String[] wordsOfExpression = ce.split(" ");
@@ -99,7 +99,6 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 						//SimpleCommand selectEligible = generateCommandPattern(sentence, eligibleFragment.getCoveredText(), governorIndex).getCommand();
 						SimpleCommand selectEligible = generateCommandSelector(sentence, governor);
 						
-						//TODO create pickers for the governed leaf nodes
 						for(String other : remainingWordsOfExpression) {
 							CommandPick picker = generateCommandPickFor(governor, other);
 							selectEligible.getFinal().addHorizontalSelection(picker);
@@ -110,13 +109,16 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 						break;
 					}
 				}
+				if(governingFound) {
+					break;
+				}
 			}
 		}
 		
 		if(command != null) {
 			return new SimpleCauseEffectGenerator(command);
 		} else {
-			System.out.println("Unable to generate CauseEffectGenerator");
+			CELogger.log().warn("Unable to generate CauseEffectGenerator");
 			return null;
 		}
 	}
@@ -194,7 +196,7 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 				}
 			}
 			
-			System.out.println("ERROR: splitUntilSearchIsUnique yields no results!");
+			CELogger.log().warn("ERROR: splitUntilSearchIsUnique yields no results!");
 			return null;
 		}
 	}

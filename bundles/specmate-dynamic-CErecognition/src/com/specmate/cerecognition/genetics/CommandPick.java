@@ -2,6 +2,7 @@ package com.specmate.cerecognition.genetics;
 
 import com.specmate.cerecognition.sentence.Fragment;
 import com.specmate.cerecognition.sentence.Leaf;
+import com.specmate.cerecognition.util.CELogger;
 
 public class CommandPick extends SimpleCommand {
 	
@@ -25,7 +26,7 @@ public class CommandPick extends SimpleCommand {
 	@Override
 	public String generateOutput(Fragment fragment) {
 		if(!(fragment instanceof Leaf)) {
-			System.out.println("ERROR: Attempting to invoke a pick-command on a non-Leaf node");
+			CELogger.log().warn("Attempting to invoke a pick-command on a non-Leaf node");
 		}
 		Leaf leaf = (Leaf) fragment;
 		
@@ -44,7 +45,7 @@ public class CommandPick extends SimpleCommand {
 			}
 		}
 		
-		System.out.println("ERROR: No governed leaf node found that complies the given dependency type");
+		CELogger.log().warn("No governed leaf node found that complies the given dependency type");
 		return "";
 	}
 

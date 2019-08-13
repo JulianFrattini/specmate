@@ -3,6 +3,7 @@ package com.specmate.cerecognition.genetics;
 import java.util.ArrayList;
 
 import com.specmate.cerecognition.sentence.Fragment;
+import com.specmate.cerecognition.util.CELogger;
 
 public class CommandSplit extends SimpleCommand {
 	
@@ -22,9 +23,9 @@ public class CommandSplit extends SimpleCommand {
 		if(split.size() > continuationIndex) {
 			return successor.generateOutput(split.get(continuationIndex));
 		} else if(split.isEmpty()) {
-			System.out.println("ERROR: 'split'-command produced no split results");
+			CELogger.log().warn("'split'-command produced no split results");
 		} else if(split.size() <= continuationIndex) {
-			System.out.println("ERROR: 'split'-command produced " + split.size() + " continuents, but the continuation index is " + continuationIndex);
+			CELogger.log().warn("'split'-command produced " + split.size() + " continuents, but the continuation index is " + continuationIndex);
 		}
 		return null;
 	}

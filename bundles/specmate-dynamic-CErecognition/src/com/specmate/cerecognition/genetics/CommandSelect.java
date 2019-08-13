@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.StringJoiner;
 
 import com.specmate.cerecognition.sentence.Fragment;
+import com.specmate.cerecognition.util.CELogger;
 
 public class CommandSelect extends SimpleCommand {
 	
@@ -91,9 +92,9 @@ public class CommandSelect extends SimpleCommand {
 				successor.generateOutput(selection);
 			}
 		} else if(selected.size() == 0) {
-			System.out.println("ERROR: CommandSelect did not identify an eligible result");
-			System.out.println("  Sentence under test: " + fragment.toString(false, false));
-			System.out.println("  Checking for " + (byType ? "type" : "word") + " " + indicator + " yielded no result");
+			CELogger.log().warn("CommandSelect did not identify an eligible result");
+			CELogger.log().warn("  Sentence under test: " + fragment.toString(false, false));
+			CELogger.log().warn("  Checking for " + (byType ? "type" : "word") + " " + indicator + " yielded no result");
 		} /*else if(selected.size() > 1) {
 			System.out.println("ERROR: CommandSelect did identify too many eligible results");
 			System.out.println("  Sentence under test: " + fragment.toString(true, false));
@@ -102,7 +103,7 @@ public class CommandSelect extends SimpleCommand {
 				System.out.println("   - " + s.toString(true, false));
 			}
 		}*/ else {
-			System.out.println("ERROR: CommandSelect yielded an unknown selection error");
+			CELogger.log().warn("ERROR: CommandSelect yielded an unknown selection error");
 		}
 		
 		return null;

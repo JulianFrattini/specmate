@@ -2,6 +2,7 @@ package com.specmate.cerecognition.causeeffectgraph;
 
 import com.specmate.cerecognition.genetics.SimpleCommand;
 import com.specmate.cerecognition.sentence.Fragment;
+import com.specmate.cerecognition.util.CELogger;
 
 public class SimpleCauseEffectGenerator {
 	
@@ -17,7 +18,7 @@ public class SimpleCauseEffectGenerator {
 	
 	public String generateCEElement(Fragment fragment) {
 		if(command == null) {
-			System.out.println("ERROR: Command is null!");
+			CELogger.log().warn("Command is not defined (object is null)!");
 			return null;
 		}
 		

@@ -3,7 +3,8 @@ package com.specmate.cerecognition.trainer;
 import java.util.ArrayList;
 
 import com.specmate.cerecognition.api.ICauseEffectRecognition;
-import com.specmate.cerecognition.pattern.IPattern;
+import com.specmate.cerecognition.main.CauseEffectRecognitionResult;
+import com.specmate.cerecognition.util.CELogger;
 
 public class CauseEffectTrainer {
 	
@@ -12,33 +13,21 @@ public class CauseEffectTrainer {
 
 	public CauseEffectTrainer(ICausalityExampleReader reader) {
 		examples = reader.readExamples();
-		statistics = new TrainingStatistics();
+		statistics = new TrainingStatistics(false);
+		
+		CELogger.log().initialize(System.out);
 	}
 	
 	public void train(ICauseEffectRecognition subject) {
-		statistics.setExamples(examples.size());
-		System.out.println("============INITIALIZING TRAINING===============");
+		CELogger.log().info("============INITIALIZING TRAINING===============");
 		
 		for(CausalityExample example : examples) {
+			CauseEffectRecognitionResult result = subject.train(example.getSentence(), example.getCause(), example.getEffect());
 			
-			IPattern result = subject.train(example.getSentence(), example.getCause(), example.getEffect());
-			
-			if(example.isCausal()) {
-				if(result != null) {
-					statistics.addSuccessful();
-				} else {
-					statistics.addFailing(example, true);
-				}
-			} else {
-				if(result == null) {
-					statistics.addSuccessful();
-				} else {
-					statistics.addFailing(example, false);
-				}
-			}
+			statistics.add(example, result);
 		}
 		
 		statistics.print();
-		System.out.println("==============ENDING TRAINING================");
+		CELogger.log().info("==============ENDING TRAINING================");
 	}
 }

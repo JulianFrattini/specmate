@@ -1,51 +1,71 @@
 package com.specmate.cerecognition.trainer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import com.specmate.cerecognition.main.CauseEffectRecognitionResult;
+import com.specmate.cerecognition.util.CELogger;
 
 public class TrainingStatistics {
-	private int examples;
-	private int successful;
+	private HashMap<CauseEffectRecognitionResult, ArrayList<CausalityExample>> results;
+	private boolean printOnlyFailingExamples;
 	
-	private ArrayList<CausalityExample> falseNegatives = new ArrayList<CausalityExample>();
-	private ArrayList<CausalityExample> falsePositives = new ArrayList<CausalityExample>();
-	
-	public TrainingStatistics() {
-		examples = 0;
-		successful = 0;
+	public TrainingStatistics(boolean printOnlyFailingExamples) {
+		this.printOnlyFailingExamples = printOnlyFailingExamples;
 		
-		falseNegatives = new ArrayList<CausalityExample>();
-		falsePositives = new ArrayList<CausalityExample>();
+		results = new HashMap<CauseEffectRecognitionResult, ArrayList<CausalityExample>>();
+		for(CauseEffectRecognitionResult type : CauseEffectRecognitionResult.values()) {
+			results.put(type, new ArrayList<CausalityExample>());
+		}
 	}
 	
-	public void setExamples(int n) {
-		examples = n;
-	}
-	
-	public void addSuccessful() {
-		successful++;
-	}
-	
-	public void addFailing(CausalityExample failing, boolean falseNegative) {
-		(falseNegative ? falseNegatives : falsePositives).add(failing);
+	public void add(CausalityExample example, CauseEffectRecognitionResult resultType) {
+		results.get(resultType).add(example);
 	}
 	
 	public void print() {
-		System.out.println("================================================");
-		System.out.println("Successfully trained " + successful + "/" + examples + " (" 
+		CELogger.log().info("================================================");
+		
+		int successful = getNumberOfExamples(true);
+		int examples = getNumberOfExamples(false);
+		CELogger.log().info("Successfully trained " + successful + "/" + examples + " (" 
 				+ getPercentile(successful, examples) + "%)");
-		if(!falsePositives.isEmpty()) {
-			System.out.println("False positives: "); 
-			for(CausalityExample obj : falsePositives) {
-				System.out.println(" - " + obj.toString());
+		
+		for(CauseEffectRecognitionResult type : CauseEffectRecognitionResult.values()) {
+			if(printOnlyFailingExamples && isCERecResultPositive(type)) {
+				continue;
+			}
+			
+			int typeOccurrence = results.get(type).size();
+			CELogger.log().info("Examples trained with result type " + type.toString() + " (" + typeOccurrence + " times, " + getPercentile(typeOccurrence, examples) + "%): "); 
+			for(CausalityExample obj : results.get(type)) {
+				CELogger.log().info(" - " + obj.toString());
 			}
 		}
-		if(!falseNegatives.isEmpty()) {
-			System.out.println("False negatives: "); 
-			for(CausalityExample obj : falseNegatives) {
-				System.out.println(" - " + obj.toString());
+		CELogger.log().info("================================================");
+	}
+	
+	private int getNumberOfExamples(boolean onlySuccessful) {
+		int result = 0;
+		for(CauseEffectRecognitionResult type : CauseEffectRecognitionResult.values()) {
+			if(onlySuccessful) {
+				if(isCERecResultPositive(type)) {
+					result = result + results.get(type).size();
+				}
+			} else {
+				result = result + results.get(type).size();
 			}
 		}
-		System.out.println("================================================");
+		return result;
+	}
+	
+	private boolean isCERecResultPositive(CauseEffectRecognitionResult type) {
+		if(type.equals(CauseEffectRecognitionResult.CREATION_SUCCESSFUL) || 
+				type.equals(CauseEffectRecognitionResult.DISCARDING_SUCCESSFUL) ||
+				type.equals(CauseEffectRecognitionResult.RECOGNITION_SUCCESSFUL)) {
+			return true;
+		}
+		return false;
 	}
 	
 	private double getPercentile(int z, int n) {

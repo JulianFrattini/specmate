@@ -1,6 +1,7 @@
 package com.specmate.cerecognition.api;
 
 import java.util.StringJoiner;
+import java.util.logging.Logger;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -13,10 +14,15 @@ import org.osgi.service.component.annotations.Reference;
 
 import com.specmate.cerecognition.causeeffectgraph.ICauseEffectGraph;
 import com.specmate.cerecognition.pattern.IPattern;
+import com.specmate.cerecognition.util.CELogger;
 import com.specmate.common.exception.SpecmateException;
 import com.specmate.emfrest.api.IRestService;
 import com.specmate.emfrest.api.RestServiceBase;
+import com.specmate.model.base.BasePackage;
+import com.specmate.model.base.Folder;
+import com.specmate.model.base.IContentElement;
 import com.specmate.rest.RestResult;
+import org.eclipse.emf.common.util.EList;
 
 @Component(immediate=true, service = IRestService.class)
 public class CERecognitionRestService extends RestServiceBase  {
@@ -24,7 +30,7 @@ public class CERecognitionRestService extends RestServiceBase  {
 
 	@Activate
 	public void start() {
-		//main = new Main();
+		CELogger.log().initialize(System.out);
 	}
 	
 	@Override
@@ -32,20 +38,50 @@ public class CERecognitionRestService extends RestServiceBase  {
 		return "cerec";
 	}
 	
-	/*@Override
+	@Override
 	public boolean canPost(Object object2, Object object) {
 		return true;
 	}
 
 	@Override
 	public RestResult<?> post(Object object2, Object object, String token) throws SpecmateException {
-		if(queryParams.containsKey("cause") && queryParams.containsKey("effect")) {
-			// train the algorithm with a sentence and a CEG
-			main.train(crop(queryParams.getFirst("sentence")),
-					crop(queryParams.getFirst("cause")),
-					crop(queryParams.getFirst("effect")));
+		if(object2 != null) {
+			System.out.println("Object2 (" + object2.getClass().getSimpleName() + "): " + object2.toString());
+			Folder folder = (Folder) object2;
+			printFolder(folder, 0);
 		} 
-	}*/
+		else 
+			System.out.println("Object2 is null");
+		
+		if(object != null) {
+			System.out.println("Object (" + object.getClass().getSimpleName() + "): " + object.toString());
+			Folder folder = (Folder) object;
+			printFolder(folder, 0);
+		} else 
+			System.out.println("Object is null");
+		
+		
+		System.out.println("Token: " + token);
+		
+		return new RestResult<>(Response.Status.OK);
+		/*main.train(crop(queryParams.getFirst("sentence")),
+					crop(queryParams.getFirst("cause")),
+					crop(queryParams.getFirst("effect"))); */
+	}
+	
+	private void printFolder(Folder folder, int tab) {
+		EList<IContentElement> list = folder.getContents();
+		for(IContentElement element: list) {
+			for(int i = 0; i < tab; i ++) {
+				System.out.print("  ");
+			}
+			System.out.println(" - " + element.getName() + " (ID: " + element.getId() + "): " + element.getDescription());
+			if(element instanceof Folder) {
+				printFolder((Folder) element, tab+1);
+			}
+			
+		}
+	}
 	
 	@Override
 	public boolean canGet(Object object) {
@@ -57,26 +93,25 @@ public class CERecognitionRestService extends RestServiceBase  {
 			throws SpecmateException {
 		if(queryParams.isEmpty()) {
 			// standard get without query parameters: pattern overview
-			return new RestResult<>(Response.Status.OK, createPatternOverview().toString());
+			return new RestResult<>(
+					Response.Status.OK, 
+					createPatternOverview().toString());
 		} else if(queryParams.containsKey("sentence")) {
-			if(queryParams.containsKey("cause") && queryParams.containsKey("effect")) {
-				// train a new pattern
-				main.train(queryParams.getFirst("sentence"),
-						queryParams.getFirst("cause"),
-						queryParams.getFirst("effect"));
-				return new RestResult<>(Response.Status.OK);
-			} else {
-				// generate the CEG of a sentence
-				return new RestResult<>(
-						Response.Status.OK, 
-						checkSentence(queryParams.getFirst("sentence")).toString());
-			}
+			// generate the Cause-Effect-Graph of a sentence
+			return new RestResult<>(
+					Response.Status.OK, 
+					checkSentence(queryParams.getFirst("sentence")).toString());
+		} else {
+			// unknown operation
+			StringJoiner sj = new StringJoiner(";");
+			queryParams.forEach((key, value) -> sj.add(key + ":" + value)); 
+			
+			CELogger.log().info("Unknown key-value-pairs in the Cause-Effect REST-get: " + sj.toString());
+			
+			return new RestResult<>(
+					Response.Status.NOT_FOUND, 
+					"No operation known to the Cause-Effect-Recognition with the following key-value-pairs: " + sj.toString());
 		}
-		
-		StringJoiner sj = new StringJoiner(";");
-		queryParams.forEach((key, value) -> sj.add(key + ":" + value)); 
-		
-		return new RestResult<>(Response.Status.OK, sj.toString());
 	}
 	
 	private JSONArray createPatternOverview() {
@@ -101,28 +136,20 @@ public class CERecognitionRestService extends RestServiceBase  {
 	}
 	
 	private JSONObject checkSentence(String sentence) {
-		ICauseEffectGraph ceg = main.getCEG(sentence);
+		ICauseEffectGraph generatedCauseEffectGraph = main.getCEG(sentence);
 		
-		JSONObject o = new JSONObject();
-		o.put("sentence", sentence);
-		if(ceg != null) {
-			o.put("cause", ceg.getCause());
-			o.put("effect", ceg.getEffect());
+		JSONObject response = new JSONObject();
+		response.put("sentence", sentence);
+		if(generatedCauseEffectGraph != null) {
+			JSONObject causality = new JSONObject();
+			causality.put("cause", generatedCauseEffectGraph.getCause());
+			causality.put("effect", generatedCauseEffectGraph.getEffect());
+			response.put("status", "causality");
 		} else {
-			o.put("status", "no cause effect");
+			response.put("status", "no cause effect");
 		}
 		
-		return o;
-	}
-	
-	private String crop(String param) {
-		if(param.startsWith("[")) {
-			param = param.substring(1);
-		} 
-		if(param.endsWith("]")) {
-			param = param.substring(0, param.length()-1);
-		}
-		return param;
+		return response;
 	}
 	
 	@Reference
