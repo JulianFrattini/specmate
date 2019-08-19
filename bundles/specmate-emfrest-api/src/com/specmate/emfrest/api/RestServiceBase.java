@@ -53,7 +53,7 @@ public abstract class RestServiceBase implements IRestService {
 	 * org.eclipse.emf.ecore.EObject)
 	 */
 	@Override
-	public RestResult<?> post(Object parent, Object child, String token) throws SpecmateException {
+	public RestResult<?> post(Object parent, Object child, MultivaluedMap<String, String> multivaluedMap, String token) throws SpecmateException {
 		return null;
 	}
 
@@ -74,7 +74,7 @@ public abstract class RestServiceBase implements IRestService {
 	 * org.eclipse.emf.ecore.EObject)
 	 */
 	@Override
-	public RestResult<?> put(Object object2, Object object, String token) throws SpecmateException {
+	public RestResult<?> put(Object object2, Object object, MultivaluedMap<String, String> multivaluedMap, String token) throws SpecmateException {
 		return null;
 	}
 

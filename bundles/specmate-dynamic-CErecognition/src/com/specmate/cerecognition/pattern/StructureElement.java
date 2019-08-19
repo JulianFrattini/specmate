@@ -196,16 +196,16 @@ public class StructureElement {
 		return clone;
 	}
 	
-	public void blacklistAllProposed() {
+	public void listAllProposed(boolean blacklist) {
 		if(!proposedKeywords.isEmpty()) {
 			for(String keyword : proposedKeywords) {
-				keywords_blacklist.add(keyword);
+				(blacklist ? keywords_blacklist : keywords_whitelist).add(keyword);
 			}
 			proposedKeywords.clear();
 		}
 		
 		for(StructureElement child : children) {
-			child.blacklistAllProposed();
+			child.listAllProposed(blacklist);
 		}
 	}
 }

@@ -15,6 +15,7 @@ public class Node extends Fragment {
 	}
 
 	public void addChild(Fragment child) {
+		child.setParent(this);
 		children.add(child);
 	}
 
@@ -57,6 +58,21 @@ public class Node extends Fragment {
 			}
 		}
 		return null;
+	}
+	
+	@Override
+	public boolean isParenting(Fragment other) {
+		for(Fragment child : children) {
+			if(child.equals(other)) {
+				return true;
+			}
+			
+			if(child.isParenting(other)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	@Override
@@ -133,7 +149,6 @@ public class Node extends Fragment {
 		return false;
 	}
 
-	@Override
 	public boolean equals(Fragment other) {
 		if(other instanceof Node) {
 			Node oNode = (Node) other;
@@ -171,6 +186,19 @@ public class Node extends Fragment {
 		} else {
 			StringJoiner sj = new StringJoiner(" ");
 			children.forEach(c -> sj.add(c.toString(false, dependencies)));
+			return sj.toString();
+		}
+	}
+	
+	@Override
+	public String toString(ArrayList<Fragment> highlights) {
+		if(highlights.contains(this)) {
+			StringJoiner sj = new StringJoiner(" ");
+			children.forEach(c -> sj.add("*" + c.toString(highlights) + "*"));
+			return sj.toString();
+		} else {
+			StringJoiner sj = new StringJoiner(" ");
+			children.forEach(c -> sj.add(c.toString(highlights)));
 			return sj.toString();
 		}
 	}

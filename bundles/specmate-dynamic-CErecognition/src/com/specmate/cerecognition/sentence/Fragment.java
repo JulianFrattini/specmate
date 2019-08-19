@@ -5,12 +5,22 @@ import java.util.ArrayList;
 import com.specmate.cerecognition.pattern.StructureElement;
 
 public abstract class Fragment {
+	private Fragment parent;
+	
 	private String tag;
 	private String coveredText;
 	
 	public Fragment(String tag, String coveredText) {
 		this.tag = tag;
 		this.coveredText = coveredText;
+	}
+
+	public Fragment getParent() {
+		return parent;
+	}
+
+	public void setParent(Fragment parent) {
+		this.parent = parent;
 	}
 
 	public String getTag() {
@@ -31,6 +41,7 @@ public abstract class Fragment {
 	
 	public abstract StructureElement generateStructure();
 	public abstract ArrayList<Fragment> getChildren();
+	public abstract boolean isParenting(Fragment other);
 	public abstract ArrayList<Leaf> getAllLeafs();
 	public abstract Leaf getLeafByToken(int beginIndex);
 	
@@ -43,6 +54,7 @@ public abstract class Fragment {
 	
 	// General
 	public abstract String toString(boolean structurized, boolean dependencies);
-	public abstract boolean equals(Fragment other);
+	public abstract String toString(ArrayList<Fragment> highlights);
+	//public abstract boolean equals(Fragment other);
 	
 }

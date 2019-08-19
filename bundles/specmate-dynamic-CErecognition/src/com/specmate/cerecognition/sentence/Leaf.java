@@ -1,6 +1,7 @@
 package com.specmate.cerecognition.sentence;
 
 import java.util.ArrayList;
+import java.util.StringJoiner;
 
 import com.specmate.cerecognition.pattern.StructureElement;
 
@@ -119,6 +120,21 @@ public class Leaf extends Fragment {
 		}
 		return null;
 	}
+
+	@Override
+	public boolean isParenting(Fragment other) {
+		return false;
+	}
+
+	public int getDegreeOfRelation(Fragment other) {
+		int degree = 0;
+		while(!other.isParenting(this)) {
+			degree++;
+			other = other.getParent();
+		}
+		
+		return degree;
+	}
 	
 	// TODO Specify Exception
 	@Override 
@@ -162,7 +178,7 @@ public class Leaf extends Fragment {
 		return false;
 	}
 	
-	@Override
+	/*@Override
 	public boolean equals(Fragment other) {
 		if(other instanceof Leaf) {
 			if(super.getTag().equals(other.getTag()) && 
@@ -171,7 +187,7 @@ public class Leaf extends Fragment {
 			}
 		}
 		return false;
-	}
+	}*/
 	
 	@Override
 	public String toString() {
@@ -198,5 +214,14 @@ public class Leaf extends Fragment {
 		}
 		
 		return result;
+	}
+	
+	@Override
+	public String toString(ArrayList<Fragment> highlights) {
+		if(highlights.contains(this)) {
+			return "*" + super.getCoveredText() + "*";
+		} else {
+			return super.getCoveredText();
+		}
 	}
 }

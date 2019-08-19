@@ -100,7 +100,7 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 						SimpleCommand selectEligible = generateCommandSelector(sentence, governor);
 						
 						for(String other : remainingWordsOfExpression) {
-							CommandPick picker = generateCommandPickFor(governor, other);
+							CommandPick picker = generateCommandPickFor(sentence.getRoot(), governor, other);
 							selectEligible.getFinal().addHorizontalSelection(picker);
 						}
 						selectEligible.getFinal().setPositionOfSelectedBetweenHorizontalSelection(
@@ -216,7 +216,7 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 		}
 	}
 	
-	private CommandPick generateCommandPickFor(Leaf leaf, String governed) {
+	/*private CommandPick generateCommandPickFor(Leaf leaf, String governed) {
 		for(Leaf gov : leaf.getGoverned()) {		
 			if(gov.getCoveredText().contentEquals(governed)) {
 				String dependencyRelationType = gov.getDependencyRelationType();
@@ -228,6 +228,66 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 		
 		// transitive approach, as the current node does not directly govern the relevant node
 		for(Leaf gov : leaf.getGoverned()) {
+			CommandPick transitiveSearchResult = generateCommandPickFor(gov, governed);
+			if(transitiveSearchResult != null) {
+				CommandPick initialize = new CommandPick(gov.getDependencyRelationType());
+				initialize.chainCommand(transitiveSearchResult);
+				return initialize;
+			}
+		}
+		return null;
+	}*/
+	
+	private CommandPick generateCommandPickFor(Fragment root, Leaf governor, String governed) {
+		ArrayList<Leaf> eligible = new ArrayList<Leaf>();
+		root.getLeafs(false, governed, eligible);
+		
+		if(!eligible.isEmpty()) {
+			if(eligible.size() == 1) {
+				return generateCommandPickFor(governor, eligible.get(0));
+			} else {			
+				Leaf closest = null; 
+				int closestDegreeOfRelation = Integer.MAX_VALUE;
+				
+				for(Leaf elig : eligible) {
+					int degreeOfRelation = governor.getDegreeOfRelation(elig);
+					
+					ArrayList<Fragment> highlightable = new ArrayList<Fragment>();
+					highlightable.add(governor);
+					highlightable.add(elig);
+					
+					if(degreeOfRelation < closestDegreeOfRelation) {
+						closestDegreeOfRelation = degreeOfRelation;
+						closest = elig;
+					}
+				}
+				
+				ArrayList<Fragment> highlightable = new ArrayList<Fragment>();
+				highlightable.add(closest);
+				CommandPick command = generateCommandPickFor(governor, closest);
+				return command;
+			}
+		} else {
+			CELogger.log().warn("Unable to generate a Pick-Command");
+			CELogger.log().warn("  Sentence: " + root.toString());
+			CELogger.log().warn("  Governor: " + governor.toString());
+			CELogger.log().warn("  Governed: " + governed);
+			return null;
+		}
+	}
+	
+	private CommandPick generateCommandPickFor(Leaf governor, Fragment governed) {
+		for(Leaf gov : governor.getGoverned()) {		
+			if(gov.equals(governed)) {
+				String dependencyRelationType = gov.getDependencyRelationType();
+				int index = gov.getNumberOfDependencyRelationOccurrencesBeforeThis();
+				
+				return new CommandPick(dependencyRelationType, index);
+			} 
+		}
+		
+		// transitive approach, as the current node does not directly govern the relevant node
+		for(Leaf gov : governor.getGoverned()) {
 			CommandPick transitiveSearchResult = generateCommandPickFor(gov, governed);
 			if(transitiveSearchResult != null) {
 				CommandPick initialize = new CommandPick(gov.getDependencyRelationType());

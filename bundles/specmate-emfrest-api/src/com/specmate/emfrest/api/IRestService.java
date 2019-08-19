@@ -15,11 +15,11 @@ public interface IRestService extends Comparable<IRestService> {
 
 	boolean canPost(Object object2, Object object);
 
-	RestResult<?> post(Object object2, Object object, String token) throws SpecmateException;
+	RestResult<?> post(Object object2, Object object, MultivaluedMap<String, String> multivaluedMap, String token) throws SpecmateException;
 
 	boolean canPut(Object object2, Object object);
 
-	RestResult<?> put(Object object2, Object object, String token) throws SpecmateException;
+	RestResult<?> put(Object object2, Object object, MultivaluedMap<String, String> multivaluedMap, String token) throws SpecmateException;
 
 	boolean canDelete(Object object);
 

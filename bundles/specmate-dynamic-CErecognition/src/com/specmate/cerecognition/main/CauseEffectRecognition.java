@@ -62,6 +62,7 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		}
 		
 		if(patternFound != null) {
+			System.out.println("Sentence '" + sentence + "' is accepted by pattern #" + patternFound.getIndex());
 			return patternFound.generateCauseEffectGraph(sen);
 		} else {
 			return null;
@@ -79,6 +80,8 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		
 		ISentence sen = annotator.createSentence(sentence);
 		ICauseEffectGraph ceg = new SimpleCauseEffectGraph(cause, effect);
+		CELogger.log().info(" " + sen.getRoot().toString(true, false));
+		CELogger.log().info(" " + sen.getRoot().toString(false, true));
 
 		CELogger.log().info("Searching for a pattern complying the sentence's structure");
 		IPattern patternFound = null;
@@ -158,6 +161,9 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 										otherStructure,
 										newPattern);
 								fullPattern.addSentence(sen);
+								
+								CELogger.log().info("Splitting successful! New pattern #" + fullPattern.getIndex() + " now covers the differentiating case!");
+								
 								
 								patterns.add(fullPattern);
 								result = CauseEffectRecognitionResult.SPLITTING_SUCCESSFUL;

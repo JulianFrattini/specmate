@@ -63,7 +63,7 @@ public class StatusService extends RestServiceBase implements IStatusService {
 	}
 
 	@Override
-	public RestResult<?> post(Object target, Object object, String token) throws SpecmateException {
+	public RestResult<?> post(Object target, Object object, MultivaluedMap<String, String> multivaluedMap, String token) throws SpecmateException {
 		if (target instanceof Resource) {
 			Status status = (Status) object;
 			switch (status.getValue()) {

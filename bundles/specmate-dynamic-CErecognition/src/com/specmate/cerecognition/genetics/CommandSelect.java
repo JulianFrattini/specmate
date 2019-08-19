@@ -84,7 +84,9 @@ public class CommandSelect extends SimpleCommand {
 					
 					StringJoiner sj = new StringJoiner(" ");
 					for(String s : result) {
-						sj.add(s);
+						// attempt to ignore all empty picker-results
+						if(!s.isEmpty()) 
+							sj.add(s);
 					}
 					return sj.toString();
 				}

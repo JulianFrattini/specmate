@@ -58,7 +58,7 @@ public class CommandPick extends SimpleCommand {
 
 	@Override
 	public String toString() {
-		return "pick " + dependencyType;
+		return "pick " + dependencyType + (successor == null ? "" : "->" + successor.toString());
 	}
 
 }

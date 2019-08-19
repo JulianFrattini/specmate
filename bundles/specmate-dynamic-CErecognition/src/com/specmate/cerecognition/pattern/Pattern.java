@@ -49,6 +49,10 @@ public class Pattern implements IPattern {
 		return cePattern;
 	}
 	
+	public ArrayList<ISentence> getAccepted() {
+		return accepted;
+	}
+	
 	/**
 	 * Checks, whether a new sentence complies with the sentence structure of this pattern
 	 * @param candidate Sentence which has to be checked
@@ -89,21 +93,35 @@ public class Pattern implements IPattern {
 	}
 	
 	public IStructure differentiateSimilar(ISentence intruder) {
+		// attempt to find a keyword in the approved sentences, that is not contained in the intruder
 		StructureElement differentiating = getDifferentiating(accepted, intruder);
 		
 		if(differentiating != null) {
 			Structure otherStructure = new Structure(sentenceStructure.getRoot().clone());
-			otherStructure.getRoot().blacklistAllProposed();
+			otherStructure.getRoot().listAllProposed(true);
 			
 			String differentiator = differentiating.getProposedKeywords().remove(0);
 			differentiating.addKeyword(differentiator, true);
 			
 			return otherStructure;
 		} else {
-			CELogger.log().error("Unable to split pattern #" + index + ":");
-			CELogger.log().error("  Intruder: " + intruder.toString());
-			CELogger.log().error("  Pattern Structure: " + sentenceStructure.toString());
-			return null;
+			// attempt to find a keyword in the intruder, that is not contained in the approved sentences
+			differentiating = getDifferentiating(intruder, accepted);
+			
+			if(differentiating != null) {
+				Structure otherStructure = new Structure(sentenceStructure.getRoot().clone());
+				otherStructure.getRoot().listAllProposed(false);
+				
+				String differentiator = differentiating.getProposedKeywords().remove(0);
+				differentiating.addKeyword(differentiator, false);
+				
+				return otherStructure;
+			} else {
+				CELogger.log().error("Unable to split pattern #" + index + ":");
+				CELogger.log().error("  Intruder: " + intruder.toString());
+				CELogger.log().error("  Pattern Structure: " + sentenceStructure.toString());
+				return null;
+			}
 		}
 	}
 	
@@ -130,6 +148,36 @@ public class Pattern implements IPattern {
 				
 				if(differentiator != null) {
 					StructureElement differentiatingStructureElement = getDifferentiator(approved.get(0).getRoot(), sentenceStructure.getRoot(), differentiator, tag);
+					differentiatingStructureElement.addProposedKeywords(differentiator);
+					return differentiatingStructureElement;
+				}
+			}
+			
+			CELogger.log().error("Could not find an applicable differentiator");
+			return null;
+		} else {
+			CELogger.log().error("No type found which is contained in all approved sentences.");
+			return null;
+		}
+	}
+	
+	// similar to the other getDifferentiating, but this time the intruding sentence must contain the differentiator
+	private StructureElement getDifferentiating(ISentence intruding, ArrayList<ISentence> approved) {
+		// find a leaf node type that is contained in all approved sentences as well as the intruding sentence
+		ArrayList<String> containedTypesInAllApproved = new ArrayList<String>();
+		for(String tag : differentiatingTags) {
+			if(isContainedByAllSentences(approved, true, tag) &&
+					intruding.getRoot().contains(true, tag)) {
+				containedTypesInAllApproved.add(tag);
+			}
+		}
+		
+		if(!containedTypesInAllApproved.isEmpty()) {
+			for(String tag : containedTypesInAllApproved) {
+				String differentiator = getWordDifferentInTagBetweenIntruderAndApproved(intruding, approved, tag);
+				
+				if(differentiator != null) {
+					StructureElement differentiatingStructureElement = getDifferentiator(intruding.getRoot(), sentenceStructure.getRoot(), differentiator, tag);
 					differentiatingStructureElement.addProposedKeywords(differentiator);
 					return differentiatingStructureElement;
 				}
@@ -170,6 +218,37 @@ public class Pattern implements IPattern {
 		for(String candidate : correspondingWords) {
 			if(isContainedByAllSentences(approved, false, candidate) &&
 					!intruder.getRoot().contains(false, candidate)) {
+				return candidate;
+			}
+		}
+		
+		return null;
+	}
+	
+	private String getWordDifferentInTagBetweenIntruderAndApproved(ISentence intruder, ArrayList<ISentence> approved, String tag) {
+		// gather all words of the approved sentences associated with this tag 
+		ArrayList<String> approvedWords = new ArrayList<String>();
+		for(ISentence sentence : approved) {
+			ArrayList<Fragment> set = new ArrayList<Fragment>();
+			sentence.getRoot().getBy(true, tag, set);
+			for(Fragment f : set) {
+				if(!approvedWords.contains(f.getCoveredText())) {
+					approvedWords.add(f.getCoveredText());
+				}
+			}
+		}
+		
+		ArrayList<String> intrudingWords = new ArrayList<String>();
+		ArrayList<Fragment> intrudingNodes = new ArrayList<Fragment>();
+		intruder.getRoot().getBy(true, tag, intrudingNodes);
+		for(Fragment intrudingNode : intrudingNodes) {
+			if(!intrudingWords.contains(intrudingNode.getCoveredText())) {
+				intrudingWords.add(intrudingNode.getCoveredText());
+			}
+		}
+		
+		for(String candidate : intrudingWords) {
+			if(!approvedWords.contains(candidate)) {
 				return candidate;
 			}
 		}

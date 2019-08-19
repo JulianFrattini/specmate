@@ -1,5 +1,6 @@
 package com.specmate.emfrest.authentication;
 
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.osgi.service.component.annotations.Activate;
@@ -45,7 +46,7 @@ public class Login extends RestServiceBase {
 	}
 
 	@Override
-	public RestResult<?> post(Object object, Object object2, String token) throws SpecmateException {
+	public RestResult<?> post(Object object, Object object2, MultivaluedMap<String, String> multivaluedMap, String token) throws SpecmateException {
 		User user = (User) object2;
 
 		UserSession session = authService.authenticate(user.getUserName(), user.getPassWord(), user.getProjectName());

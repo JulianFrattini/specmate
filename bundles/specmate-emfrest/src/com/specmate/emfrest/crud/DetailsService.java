@@ -40,7 +40,7 @@ public class DetailsService extends RestServiceBase {
 	}
 
 	@Override
-	public RestResult<?> put(Object target, Object update, String token) throws SpecmateException {
+	public RestResult<?> put(Object target, Object update, MultivaluedMap<String, String> multivaluedMap, String token) throws SpecmateException {
 		return CrudUtil.update(target, (EObject) update, authService.getUserName(token));
 	}
 

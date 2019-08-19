@@ -12,15 +12,13 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.specmate.cerecognition.causeeffectgraph.ICauseEffectGraph;
+import com.specmate.cerecognition.main.CauseEffectRecognitionResult;
 import com.specmate.cerecognition.pattern.IPattern;
 import com.specmate.cerecognition.util.CELogger;
 import com.specmate.common.exception.SpecmateException;
 import com.specmate.emfrest.api.IRestService;
 import com.specmate.emfrest.api.RestServiceBase;
-import com.specmate.model.base.Folder;
-import com.specmate.model.base.IContentElement;
 import com.specmate.rest.RestResult;
-import org.eclipse.emf.common.util.EList;
 
 @Component(immediate=true, service = IRestService.class)
 public class CERecognitionRestService extends RestServiceBase  {
@@ -42,42 +40,20 @@ public class CERecognitionRestService extends RestServiceBase  {
 	}
 
 	@Override
-	public RestResult<?> post(Object object2, Object object, String token) throws SpecmateException {
-		if(object2 != null) {
-			System.out.println("Object2 (" + object2.getClass().getSimpleName() + "): " + object2.toString());
-			Folder folder = (Folder) object2;
-			printFolder(folder, 0);
-		} 
-		else 
-			System.out.println("Object2 is null");
-		
-		if(object != null) {
-			System.out.println("Object (" + object.getClass().getSimpleName() + "): " + object.toString());
-			Folder folder = (Folder) object;
-			printFolder(folder, 0);
-		} else 
-			System.out.println("Object is null");
-		
-		
-		System.out.println("Token: " + token);
-		
-		return new RestResult<>(Response.Status.OK);
-		/*main.train(crop(queryParams.getFirst("sentence")),
-					crop(queryParams.getFirst("cause")),
-					crop(queryParams.getFirst("effect"))); */
-	}
+	public RestResult<?> post(Object object2, Object object, MultivaluedMap<String, String> queryParams, String token) throws SpecmateException {
+		if(queryParams.containsKey("sentence") && 
+				queryParams.containsKey("cause") && 
+				queryParams.containsKey("effect")) {
+			// training a new pattern
+			CauseEffectRecognitionResult result = main.train(queryParams.getFirst("sentence"),
+						queryParams.getFirst("cause"),
+						queryParams.getFirst("effect")); 
 	
-	private void printFolder(Folder folder, int tab) {
-		EList<IContentElement> list = folder.getContents();
-		for(IContentElement element: list) {
-			for(int i = 0; i < tab; i ++) {
-				System.out.print("  ");
-			}
-			System.out.println(" - " + element.getName() + " (ID: " + element.getId() + "): " + element.getDescription());
-			if(element instanceof Folder) {
-				printFolder((Folder) element, tab+1);
-			}
-			
+			return new RestResult<>(Response.Status.OK, "Trained Cause-Effect-Recognition with result " + result.toString());
+		} else {
+			// unknown operation
+			return new RestResult<>(
+					Response.Status.NOT_FOUND, "Unknown POST-Operation");
 		}
 	}
 	
@@ -127,6 +103,10 @@ public class CERecognitionRestService extends RestServiceBase  {
 			
 			patternObject.put("generation", generationCommands);
 			
+			JSONArray accepted = new JSONArray();
+			pattern.getAccepted().forEach(s -> accepted.put(s.toString()));
+			patternObject.put("accepted", accepted);
+			
 			array.put(patternObject);
 		}
 		
@@ -142,7 +122,7 @@ public class CERecognitionRestService extends RestServiceBase  {
 			JSONObject causality = new JSONObject();
 			causality.put("cause", generatedCauseEffectGraph.getCause());
 			causality.put("effect", generatedCauseEffectGraph.getEffect());
-			response.put("status", "causality");
+			response.put("status", causality);
 		} else {
 			response.put("status", "no cause effect");
 		}

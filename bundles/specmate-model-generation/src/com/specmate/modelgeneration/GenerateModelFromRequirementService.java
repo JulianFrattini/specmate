@@ -2,6 +2,7 @@ package com.specmate.modelgeneration;
 
 import java.net.URISyntaxException;
 
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
@@ -55,7 +56,7 @@ public class GenerateModelFromRequirementService extends RestServiceBase {
 	}
 
 	@Override
-	public RestResult<?> post(Object parent, Object child, String token) {
+	public RestResult<?> post(Object parent, Object child, MultivaluedMap<String, String> multivaluedMap, String token) {
 		CEGModel model = (CEGModel) parent;
 		model.getContents().clear(); // Delete Contents
 		

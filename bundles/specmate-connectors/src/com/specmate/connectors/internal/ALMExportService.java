@@ -1,5 +1,6 @@
 package com.specmate.connectors.internal;
 
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.osgi.service.component.annotations.Component;
@@ -41,7 +42,7 @@ public class ALMExportService extends RestServiceBase {
 	}
 
 	@Override
-	public RestResult<?> post(Object target, Object object, String token) throws SpecmateException {
+	public RestResult<?> post(Object target, Object object, MultivaluedMap<String, String> multivaluedMap, String token) throws SpecmateException {
 		if (isAuthorizedToExport(token)) {
 			TestProcedure testProcedure = (TestProcedure) target;
 			String projectName = SpecmateEcoreUtil.getProjectId(testProcedure);

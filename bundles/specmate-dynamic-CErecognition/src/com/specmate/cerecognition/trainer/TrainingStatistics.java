@@ -62,7 +62,10 @@ public class TrainingStatistics {
 	private boolean isCERecResultPositive(CauseEffectRecognitionResult type) {
 		if(type.equals(CauseEffectRecognitionResult.CREATION_SUCCESSFUL) || 
 				type.equals(CauseEffectRecognitionResult.DISCARDING_SUCCESSFUL) ||
-				type.equals(CauseEffectRecognitionResult.RECOGNITION_SUCCESSFUL)) {
+				type.equals(CauseEffectRecognitionResult.RECOGNITION_SUCCESSFUL) ||
+				type.equals(CauseEffectRecognitionResult.DEFLECTION_SUCCESSFUL) ||
+				type.equals(CauseEffectRecognitionResult.SPLITTING_SUCCESSFUL) )
+		{
 			return true;
 		}
 		return false;
