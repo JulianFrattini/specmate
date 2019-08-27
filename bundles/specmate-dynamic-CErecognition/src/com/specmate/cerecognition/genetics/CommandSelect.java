@@ -8,6 +8,14 @@ import com.specmate.cerecognition.util.CELogger;
 
 public class CommandSelect extends SimpleCommand {
 	
+	/*
+	 * Simple selection of the current node;
+	 */
+	private boolean take;
+	
+	/*
+	 * Simple selection byType of the tag / word indicator
+	 */
 	private boolean byType;
 	private String indicator;
 	
@@ -31,6 +39,14 @@ public class CommandSelect extends SimpleCommand {
 	 */
 	private int positionOfSelectedBetweenHorizontalSelection;
 
+	public CommandSelect() {
+		super();
+		take = true;
+		index = 0;
+		
+		horizontalSelection = new ArrayList<CommandPick>();
+	}
+	
 	public CommandSelect(boolean byType, String indicator) {
 		super();
 		this.byType = byType;
@@ -59,63 +75,76 @@ public class CommandSelect extends SimpleCommand {
 
 	@Override
 	public String generateOutput(Fragment fragment) {
-		ArrayList<Fragment> selected = new ArrayList<Fragment>();
-		fragment.select(byType, indicator, selected);
-
-		if(selected.size() > 0) {
-			Fragment selection = selected.get(index);
-			
-			if(successor == null) {
-				if(horizontalSelection.isEmpty()) {
-					return selection.getCoveredText();
-				} else {
-					// horizontal selection is active and CommandPick's have to be resolved
-					String[] result = new String[horizontalSelection.size()+1];
-					
-					for(int i = 0; i < result.length; i++) {
-						if(i < positionOfSelectedBetweenHorizontalSelection) {
-							result[i] = horizontalSelection.get(i).generateOutput(selection);
-						} else if(i == positionOfSelectedBetweenHorizontalSelection) {
-							result[i] = selection.getCoveredText();
-						} else if(i > positionOfSelectedBetweenHorizontalSelection) {
-							result[i] = horizontalSelection.get(i-1).generateOutput(selection);
-						}
-					}
-					
-					StringJoiner sj = new StringJoiner(" ");
-					for(String s : result) {
-						// attempt to ignore all empty picker-results
-						if(!s.isEmpty()) 
-							sj.add(s);
-					}
-					return sj.toString();
-				}
+		Fragment selection = null;
+		
+		if(take) {
+			// directly take the current fragment
+			selection = fragment;
+		} else {
+			// select a certain fragment from the children of the current
+			ArrayList<Fragment> selected = new ArrayList<Fragment>();
+			fragment.select(byType, indicator, selected);
+	
+			if(selected.size() > 0) {
+				selection = selected.get(index);
+				
+				
+			} else if(selected.size() == 0) {
+				CELogger.log().warn("CommandSelect did not identify an eligible result");
+				CELogger.log().warn("  Sentence under test: " + fragment.toString(false, false));
+				CELogger.log().warn("  Checking for " + (byType ? "type" : "word") + " " + indicator + " yielded no result");
 			} else {
-				successor.generateOutput(selection);
+				CELogger.log().warn("ERROR: CommandSelect yielded an unknown selection error");
 			}
-		} else if(selected.size() == 0) {
-			CELogger.log().warn("CommandSelect did not identify an eligible result");
-			CELogger.log().warn("  Sentence under test: " + fragment.toString(false, false));
-			CELogger.log().warn("  Checking for " + (byType ? "type" : "word") + " " + indicator + " yielded no result");
-		} /*else if(selected.size() > 1) {
-			System.out.println("ERROR: CommandSelect did identify too many eligible results");
-			System.out.println("  Sentence under test: " + fragment.toString(true, false));
-			System.out.println("  Checking for " + (byType ? "type" : "word") + " " + indicator + " yielded the following result");
-			for(Fragment s : selected) {
-				System.out.println("   - " + s.toString(true, false));
-			}
-		}*/ else {
-			CELogger.log().warn("ERROR: CommandSelect yielded an unknown selection error");
 		}
 		
-		return null;
+		if(selection != null) {
+			if(successor == null) {
+				return constructResult(selection);
+			} else {
+				return successor.generateOutput(selection);
+			}
+		} else {
+			return null;
+		}
+	}
+	
+	private String constructResult(Fragment selection) {
+		if(horizontalSelection.isEmpty()) {
+			return selection.getCoveredText();
+		} else {
+			// horizontal selection is active and CommandPick's have to be resolved
+			String[] result = new String[horizontalSelection.size()+1];
+			
+			for(int i = 0; i < result.length; i++) {
+				if(i < positionOfSelectedBetweenHorizontalSelection) {
+					result[i] = horizontalSelection.get(i).generateOutput(selection);
+				} else if(i == positionOfSelectedBetweenHorizontalSelection) {
+					result[i] = selection.getCoveredText();
+				} else if(i > positionOfSelectedBetweenHorizontalSelection) {
+					result[i] = horizontalSelection.get(i-1).generateOutput(selection);
+				}
+			}
+			
+			StringJoiner sj = new StringJoiner(" ");
+			for(String s : result) {
+				// attempt to ignore all empty picker-results
+				if(!s.isEmpty()) 
+					sj.add(s);
+			}
+			return sj.toString();
+		}
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		
-		sb.append("select " + (byType ? "type" : "word") + " " + indicator);
+		if(take) {
+			sb.append("select");
+		} else {
+			sb.append("select " + (byType ? "type" : "word") + " " + indicator);
+		}
 		
 		if(!horizontalSelection.isEmpty()) {
 			StringJoiner sj = new StringJoiner(" & ");

@@ -8,17 +8,21 @@ import com.specmate.cerecognition.util.CELogger;
 
 public class CauseEffectTrainer {
 	
-	private ArrayList<CausalityExample> examples;
+	private ICauseEffectRecognition subject;
 	private TrainingStatistics statistics;
 
-	public CauseEffectTrainer(ICausalityExampleReader reader) {
-		examples = reader.readExamples();
+	public CauseEffectTrainer(ICauseEffectRecognition subject) {
+		this.subject = subject;
 		statistics = new TrainingStatistics(false);
 		
 		CELogger.log().initialize(System.out);
 	}
 	
-	public void train(ICauseEffectRecognition subject) {
+	public void train(ICausalityExampleReader reader) {
+		train(reader.readExamples());
+	}
+	
+	public void train(ArrayList<CausalityExample> examples) {
 		CELogger.log().info("============INITIALIZING TRAINING===============");
 		
 		for(CausalityExample example : examples) {
@@ -27,7 +31,14 @@ public class CauseEffectTrainer {
 			statistics.add(example, result);
 		}
 		
-		statistics.print();
 		CELogger.log().info("==============ENDING TRAINING================");
+	}
+	
+	public void resetStatistics() {
+		statistics = new TrainingStatistics(false);
+	}
+	
+	public void printStatistics() {
+		statistics.print();
 	}
 }

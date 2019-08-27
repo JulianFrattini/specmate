@@ -1,7 +1,6 @@
 package com.specmate.cerecognition.sentence;
 
 import java.util.ArrayList;
-import java.util.StringJoiner;
 
 import com.specmate.cerecognition.pattern.StructureElement;
 
@@ -55,9 +54,9 @@ public class Leaf extends Fragment {
 		this.dependencyRelationType = dependencyRelationType;
 	}
 	
-	public boolean isGoverningAll(ArrayList<String> others) {
+	public boolean isGoverningAllPhrases(ArrayList<String> others) {
 		for(String other : others) {
-			if(!isGoverning(other)) {
+			if(!isGoverningPhrase(other)) {
 				return false;
 			}
 		}
@@ -65,13 +64,41 @@ public class Leaf extends Fragment {
 		return true;
 	}
 	
-	public boolean isGoverning(String other) {
+	public boolean isGoverningPhrase(String other) {
 		for(Leaf gov : governed) {
 			if(gov.getCoveredText().equals(other)) {
 				return true;
 			} else {
 				if(!gov.getCoveredText().contentEquals(getCoveredText())) {
-					if(gov.isGoverning(other)) {
+					if(gov.isGoverningPhrase(other)) {
+						return true;
+					}
+				} else {
+					return false;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean isGoverningAllLeafs(ArrayList<Leaf> others) {
+		for(Leaf other : others) {
+			if(!isGoverningLeaf(other)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	public boolean isGoverningLeaf(Leaf other) {
+		for(Leaf gov : governed) {
+			if(gov.equals(other)) {
+				return true;
+			} else {
+				if(!gov.equals(other)) {
+					if(gov.isGoverningLeaf(other)) {
 						return true;
 					}
 				} else {
@@ -169,10 +196,28 @@ public class Leaf extends Fragment {
 	}
 	
 	@Override
+	public Fragment getParentOf(Fragment child) { 
+		return null;
+	}
+	
+	@Override
+	public Fragment getDirectParentOf(Fragment child) {
+		return null;
+	}
+	
+	@Override
 	public boolean contains(boolean byType, String indicator) {
 		if(byType && super.getTag().equals(indicator)) {
 			return true;
 		} else if(!byType && super.getCoveredText().equals(indicator)) {
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean contains(Fragment fragment) {
+		if(this.equals(fragment)) {
 			return true;
 		}
 		return false;

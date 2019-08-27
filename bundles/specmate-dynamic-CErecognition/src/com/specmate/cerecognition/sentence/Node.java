@@ -134,6 +134,29 @@ public class Node extends Fragment {
 	}
 	
 	@Override
+	public Fragment getParentOf(Fragment child) { 
+		for(Fragment own_child : children) {
+			if(own_child.contains(child)) {
+				return own_child;
+			}
+		}
+		return null;
+	}
+	
+	@Override
+	public Fragment getDirectParentOf(Fragment child) {
+		for(Fragment own_child : children) {
+			for(Fragment grandchild : own_child.getChildren()) {
+				if(grandchild.equals(child)) {
+					return own_child;
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	@Override
 	public boolean contains(boolean byType, String indicator) {
 		if(byType && super.getTag().equals(indicator)) {
 			return true;
@@ -143,6 +166,20 @@ public class Node extends Fragment {
 		
 		for(Fragment child : children) {
 			if(child.contains(byType, indicator)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean contains(Fragment fragment) {
+		if(this.equals(fragment)) {
+			return true;
+		}
+		
+		for(Fragment child : children) {
+			if(child.contains(fragment)) {
 				return true;
 			}
 		}

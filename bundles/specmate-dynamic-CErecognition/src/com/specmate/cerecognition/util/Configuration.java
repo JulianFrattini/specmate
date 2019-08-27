@@ -4,7 +4,15 @@ public class Configuration {
 	
 	// True if the system shall be trained from the beginning on
 	public static final boolean AUTO_TRAIN = true;
-	public static final String TRAINING_FILE = "database/ceexamples.json";
+	public static final String[] TRAINING_FILES = {
+			"database/ceexamples.json",
+			"database/ceexamples2.json",
+			};
+	public static final String[] TESTING_FILES = {
+			"database/cee_ahe.json"
+			};
+	public static final String TRAINING_FILE_SPECIAL =
+			"database/ceexamples_reduced.json";
 	
 	// Logger attributes
 	public static int CURRENT_LOG_LEVEL = 0;

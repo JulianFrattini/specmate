@@ -11,7 +11,7 @@ import com.specmate.cerecognition.sentence.Fragment;
 import com.specmate.cerecognition.sentence.ISentence;
 import com.specmate.cerecognition.sentence.Leaf;
 import com.specmate.cerecognition.util.CELogger;
-import com.specmate.cerecognition.util.StringUtils;
+import com.specmate.cerecognition.util.Utils;
 
 public class SimpleCommandGenerator implements ICommandGenerator {
 
@@ -61,12 +61,14 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 				command = new CommandSelect(true, eligibleType); 
 			} else {
 				// the search for the type is not unique yet, so the sentence has to be split up first
-				SimpleCommand splitter = splitUntilSearchIsUnique(
+				/*SimpleCommand splitter = splitUntilSearchIsUnique(
 						sentence.getRoot(),
 						eligibleType,
 						eligible.getCoveredText());
 				command = addCommand(command, splitter);
-				command = addCommand(command, new CommandSelect(true, eligibleType));
+				command = addCommand(command, new CommandSelect(true, eligibleType));*/
+				
+				command = getUniqueSelector(sentence.getRoot(), eligible);
 			}
 		} else if(eligibleByExpression.size() > 1) {
 			// TODO more than one node eligible when searching for the given expression
@@ -79,38 +81,15 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 			// no node in the tree of constituents exclusively contains the full expression
 			// horizontal approach: find one governing leaf among the nodes that make up the expression
 			
-			boolean governingFound = false;
+			// clean attempt via leafs
+			command = generateHorizontalSelectionByLeafs(sentence.getRoot(), ce);
 			
-			String[] wordsOfExpression = ce.split(" ");
-			for(String word : wordsOfExpression) {
-				// for each word of the expression: check if all other words have a reference to this word
-				ArrayList<Leaf> set = new ArrayList<Leaf>();
-				sentence.getRoot().getLeafs(false, word, set);
-				
-				// words used in the expression can appear multiple times, but only the one belonging to the expression is possibly governing
-				for(Fragment eligibleFragment : set) {
-					ArrayList<String> remainingWordsOfExpression = StringUtils.generateListWithout(wordsOfExpression, word);
-				
-					Leaf governor = (Leaf) eligibleFragment;
-					if(governor.isGoverningAll(remainingWordsOfExpression)) {
-						governingFound = true;
-						
-						// create a command that selects the governing leaf node
-						//SimpleCommand selectEligible = generateCommandPattern(sentence, eligibleFragment.getCoveredText(), governorIndex).getCommand();
-						SimpleCommand selectEligible = generateCommandSelector(sentence, governor);
-						
-						for(String other : remainingWordsOfExpression) {
-							CommandPick picker = generateCommandPickFor(sentence.getRoot(), governor, other);
-							selectEligible.getFinal().addHorizontalSelection(picker);
-						}
-						selectEligible.getFinal().setPositionOfSelectedBetweenHorizontalSelection(
-								StringUtils.getPositionOfWordInExpression(ce, governor.getCoveredText()));
-						command = selectEligible;
-						break;
-					}
-				}
-				if(governingFound) {
-					break;
+			if(command == null) {
+				// fallback attempt via words
+				command = generateHorizontalSelectionByWords(sentence.getRoot(), ce);
+			
+				if(command == null) {
+					CELogger.log().warn("Impossible to create a horizontal selection!");
 				}
 			}
 		}
@@ -123,11 +102,127 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 		}
 	}
 	
-	private SimpleCommand generateCommandSelector(ISentence sentence, Leaf leaf) {
+	/**
+	 * Attempt to generate a selector for a governing leaf within the expression, which uses horizontal selection to find the remaining words of the expression
+	 * @param root The root fragment of the sentence
+	 * @param phrase The phrase to be extracted
+	 * @return Command, which extracts the given phrase from a sentence structure
+	 */
+	private SimpleCommand generateHorizontalSelectionByLeafs(Fragment root, String phrase) {
+		// find the chain of leafs, that represent the phrase in the sentence
+		ArrayList<Leaf> leafChain = findLeafChain(root, phrase);
+		
+		if(leafChain != null) {
+			Leaf governor = null;
+			
+			// find the one leaf within the chain, which governs all other leafs
+			ArrayList<Leaf> others = null;
+			for(Leaf leaf : leafChain) {
+				others = Utils.generateListWithout(leafChain, leaf);
+				if(leaf.isGoverningAllLeafs(others)) {
+					governor = leaf;
+					break;
+				}
+			}
+			
+			if(governor != null) {
+				// generate a selector picking the governing leaf
+				SimpleCommand selectEligible = generateCommandSelector(root, governor);
+				
+				// add horizontal selection for all other leafs
+				for(Leaf other : others) {
+					CommandPick picker = generateCommandPickFor(governor, other);
+					selectEligible.getFinal().addHorizontalSelection(picker);
+				}
+				// place the governor within the horizontal selections
+				selectEligible.getFinal().setPositionOfSelectedBetweenHorizontalSelection(
+						Utils.getPositionOfWordInExpression(phrase, governor.getCoveredText()));
+				
+				return selectEligible;
+			} else {
+				// unable to find a governing leaf in the leaf chain
+				return null;
+			}
+		} else {
+			// unable to find a chain of leafs representing the phrase
+			return null;
+		}
+	}
+	
+	/**
+	 * If possible, find the chain of leafs that represent the phrase in the internal representation of the sentence
+	 * @param root Root fragment of the internal representation of the sentence
+	 * @param phrase Expression, that shall be found in the sentence
+	 * @return The chain of leafs in the sentence, that cover the phrase
+	 */
+	private ArrayList<Leaf> findLeafChain(Fragment root, String phrase) {
+		ArrayList<Leaf> all = root.getAllLeafs();
+		ArrayList<Leaf> phraseAsLeafs = new ArrayList<Leaf>();
+		String[] phraseWords = phrase.split(" ");
+		
+		boolean leafChainFound = false;
+		int phraseIndex = 0;
+		for(Leaf leaf : all) {
+			if(phraseWords[phraseIndex].equals(leaf.getCoveredText())) {
+				phraseAsLeafs.add(leaf);
+				phraseIndex++;
+				
+				if(phraseIndex == phraseWords.length) {
+					leafChainFound = true;
+					break;
+				}
+			}
+		}
+		
+		if(leafChainFound) 
+			return phraseAsLeafs;
+		else
+			return null;
+	}
+	
+	/**
+	 * Attempt to generate a selector for a governing leaf within the expression, which uses horizontal selection to find the remaining words of the expression
+	 * @param root The root fragment of the sentence
+	 * @param phrase The phrase to be extracted
+	 * @return Command, which extracts the given phrase from a sentence structure
+	 */
+	private SimpleCommand generateHorizontalSelectionByWords(Fragment root, String phrase) {
+		String[] wordsOfExpression = phrase.split(" ");
+		for(String word : wordsOfExpression) {
+			// for each word of the expression: check if all other words have a reference to this word
+			ArrayList<Leaf> set = new ArrayList<Leaf>();
+			root.getLeafs(false, word, set);
+			
+			// words used in the expression can appear multiple times, but only the one belonging to the expression is possibly governing
+			for(Fragment eligibleFragment : set) {
+				ArrayList<String> remainingWordsOfExpression = Utils.generateListWithout(wordsOfExpression, word);
+			
+				Leaf governor = (Leaf) eligibleFragment;
+				if(governor.isGoverningAllPhrases(remainingWordsOfExpression)) {
+					// create a command that selects the governing leaf node
+					SimpleCommand selectEligible = generateCommandSelector(root, governor);
+					
+					for(String other : remainingWordsOfExpression) {
+						CommandPick picker = generateCommandPickFor(root, governor, other);
+						selectEligible.getFinal().addHorizontalSelection(picker);
+					}
+					selectEligible.getFinal().setPositionOfSelectedBetweenHorizontalSelection(
+							Utils.getPositionOfWordInExpression(phrase, governor.getCoveredText()));
+					
+					return selectEligible;
+				}
+			}
+		}
+		
+		// unable to generate a command extracting the phrase
+		return null;
+	}
+	
+	private SimpleCommand generateCommandSelector(Fragment root, Leaf leaf) {
 		SimpleCommand command = null;
 		
 		ArrayList<Leaf> eligibleByExpression = new ArrayList<Leaf>();
-		sentence.getRoot().getLeafs(false, leaf.getCoveredText(), eligibleByExpression);
+		root.getLeafs(false, leaf.getCoveredText(), eligibleByExpression);
 		
 		int eligibleIndex = 0;
 		if(eligibleByExpression.size() > 1) {
@@ -144,13 +239,13 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 		String eligibleType = eligible.getTag();
 		
 		ArrayList<Fragment> eligibleByType = new ArrayList<Fragment>();
-		sentence.getRoot().getBy(true, eligibleType, eligibleByType);
+		root.getBy(true, eligibleType, eligibleByType);
 		
 		if(eligibleByType.size() == 1) {
 			command = new CommandSelect(true, eligibleType); 
 		} else {
 			SimpleCommand splitter = splitUntilSearchIsUnique(
-					sentence.getRoot(),
+					root,
 					eligibleType,
 					eligible.getCoveredText());
 			command = addCommand(command, splitter);
@@ -169,12 +264,7 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 			return null;
 		} else {
 			// the search is currently not yielding a distinct result
-			ArrayList<Fragment> split = null;
-			try {
-				split = current.split();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			ArrayList<Fragment> split = current.split();
 			
 			// find a child-node where the search would be distinct
 			for(int i = 0; i < split.size(); i++) {
@@ -201,6 +291,41 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 		}
 	}
 	
+	private SimpleCommand getUniqueSelector(Fragment current, Fragment desired) {
+		if(current.equals(desired)) {
+			// this case occurs, when the desired chunk has a child node with the same tag
+			SimpleCommand cmd = new CommandSelect();
+			return cmd;	
+		} else {
+			ArrayList<Fragment> currentlyEligible = new ArrayList<Fragment>();
+			current.getBy(true, desired.getTag(), currentlyEligible);
+			
+			if(currentlyEligible.size() == 1) {
+				// the search for the type yields exactly one result
+				SimpleCommand cmd = new CommandSelect(true, desired.getTag());
+				return cmd;	
+			} else {
+				// the search is currently not yielding a distinct result
+				ArrayList<Fragment> split = current.split();
+				
+				// find a child-node where the search would be distinct
+				for(int i = 0; i < split.size(); i++) {
+					// check if the current child contains the phrase searched for
+					// this is to ensure that the node searched for is exactly the relevant one, not another of the same type
+					
+					if(split.get(i).contains(desired)) {
+						SimpleCommand cmd = new CommandSplit(i);
+						addCommand(cmd, getUniqueSelector(split.get(i), desired));
+						return cmd;
+					}
+				}
+				
+				CELogger.log().warn("ERROR: splitUntilSearchIsUnique yields no results!");
+				return null;
+			}
+		}
+	}
+	
 	/**
 	 * Attempts to chain a command to an existing one, if it exists
 	 * @param existing The possibly already existing predecessor
@@ -215,28 +340,6 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 			return existing;
 		}
 	}
-	
-	/*private CommandPick generateCommandPickFor(Leaf leaf, String governed) {
-		for(Leaf gov : leaf.getGoverned()) {		
-			if(gov.getCoveredText().contentEquals(governed)) {
-				String dependencyRelationType = gov.getDependencyRelationType();
-				int index = gov.getNumberOfDependencyRelationOccurrencesBeforeThis();
-				
-				return new CommandPick(dependencyRelationType, index);
-			} 
-		}
-		
-		// transitive approach, as the current node does not directly govern the relevant node
-		for(Leaf gov : leaf.getGoverned()) {
-			CommandPick transitiveSearchResult = generateCommandPickFor(gov, governed);
-			if(transitiveSearchResult != null) {
-				CommandPick initialize = new CommandPick(gov.getDependencyRelationType());
-				initialize.chainCommand(transitiveSearchResult);
-				return initialize;
-			}
-		}
-		return null;
-	}*/
 	
 	private CommandPick generateCommandPickFor(Fragment root, Leaf governor, String governed) {
 		ArrayList<Leaf> eligible = new ArrayList<Leaf>();
@@ -290,7 +393,10 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 		for(Leaf gov : governor.getGoverned()) {
 			CommandPick transitiveSearchResult = generateCommandPickFor(gov, governed);
 			if(transitiveSearchResult != null) {
-				CommandPick initialize = new CommandPick(gov.getDependencyRelationType());
+				String dependencyRelationType = gov.getDependencyRelationType();
+				int index = gov.getNumberOfDependencyRelationOccurrencesBeforeThis();
+			
+				CommandPick initialize = new CommandPick(dependencyRelationType, index);
 				initialize.chainCommand(transitiveSearchResult);
 				return initialize;
 			}

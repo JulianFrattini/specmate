@@ -194,11 +194,9 @@ public class Pattern implements IPattern {
 	private boolean isContainedByAllSentences(ArrayList<ISentence> sentences, boolean byType, String indicator) {
 		for(ISentence sentence : sentences) {
 			if(!sentence.getRoot().contains(byType, indicator)) {
-				System.out.println((byType ? "Type" : "Word") + " " + indicator + " is not contained in " + sentence.getRoot().toString(true, false));
 				return false;
 			}
 		}
-		System.out.println((byType ? "Type" : "Word") + " " + indicator + " IS contained!");
 		return true;
 	}
 	

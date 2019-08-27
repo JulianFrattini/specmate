@@ -49,8 +49,11 @@ public abstract class Fragment {
 	public abstract ArrayList<Fragment> split();
 	public abstract ArrayList<Fragment> getBy(boolean byType, String indicator, ArrayList<Fragment> selected);
 	public abstract ArrayList<Leaf> getLeafs(boolean byType, String indicator, ArrayList<Leaf> selected);
+	public abstract Fragment getParentOf(Fragment child);
+	public abstract Fragment getDirectParentOf(Fragment child);
 	public abstract ArrayList<Fragment> select(boolean byType, String indicator, ArrayList<Fragment> selected);
 	public abstract boolean contains(boolean byType, String indicator);
+	public abstract boolean contains(Fragment fragment);
 	
 	// General
 	public abstract String toString(boolean structurized, boolean dependencies);
