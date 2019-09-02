@@ -239,4 +239,24 @@ public class Node extends Fragment {
 			return sj.toString();
 		}
 	}
+	
+	@Override
+	public String structureToString() {
+		String result = "(" + super.getTag() + ")";
+
+		StringJoiner sj = new StringJoiner(" ");
+		for(Fragment child : children) {
+			String childStructure = child.structureToString();
+			if(childStructure != null) {
+				sj.add(childStructure);
+			}
+		}
+		
+		String childStructure = sj.toString();
+		if(!childStructure.isEmpty()) {
+			result = result + " (" + childStructure + ")";
+		}
+		
+		return result;
+	}
 }

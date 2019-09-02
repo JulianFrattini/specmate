@@ -58,6 +58,7 @@ public abstract class Fragment {
 	// General
 	public abstract String toString(boolean structurized, boolean dependencies);
 	public abstract String toString(ArrayList<Fragment> highlights);
+	public abstract String structureToString();
 	//public abstract boolean equals(Fragment other);
 	
 }

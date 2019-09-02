@@ -126,7 +126,7 @@ public class Pattern implements IPattern {
 	}
 	
 	// list of tags, that might trigger an differentiation, ordered by relevance
-	private String[] differentiatingTags = {"IN", "PP", "DT"};
+	private String[] differentiatingTags = {"IN", "PP", "DT", "VP", "NP"};
 	/**
 	 * Identifies a fragment that is similar in all approved sentences but different in the intruding sentence
 	 * @param approved The list of sentences that do belong to this pattern
@@ -148,12 +148,16 @@ public class Pattern implements IPattern {
 				
 				if(differentiator != null) {
 					StructureElement differentiatingStructureElement = getDifferentiator(approved.get(0).getRoot(), sentenceStructure.getRoot(), differentiator, tag);
-					differentiatingStructureElement.addProposedKeywords(differentiator);
-					return differentiatingStructureElement;
+					if(differentiatingStructureElement != null) {
+						differentiatingStructureElement.addProposedKeywords(differentiator);
+						return differentiatingStructureElement;
+					} else {
+						CELogger.log().error("Could not find an applicable differentiator");
+					}
 				}
 			}
 			
-			CELogger.log().error("Could not find an applicable differentiator");
+			CELogger.log().error("Positive Differentiation failed");
 			return null;
 		} else {
 			CELogger.log().error("No type found which is contained in all approved sentences.");
@@ -178,12 +182,16 @@ public class Pattern implements IPattern {
 				
 				if(differentiator != null) {
 					StructureElement differentiatingStructureElement = getDifferentiator(intruding.getRoot(), sentenceStructure.getRoot(), differentiator, tag);
-					differentiatingStructureElement.addProposedKeywords(differentiator);
-					return differentiatingStructureElement;
+					if(differentiatingStructureElement != null) {
+						differentiatingStructureElement.addProposedKeywords(differentiator);
+						return differentiatingStructureElement;
+					} else {
+						CELogger.log().error("Could not find an applicable differentiator");
+					}
 				}
 			}
 			
-			CELogger.log().error("Could not find an applicable differentiator");
+			CELogger.log().error("Negative Differentiation failed");
 			return null;
 		} else {
 			CELogger.log().error("No type found which is contained in all approved sentences.");
@@ -263,24 +271,25 @@ public class Pattern implements IPattern {
 			}
 		}
 		
-		StructureElement eligibleStructure = null; 
-		if(eligibleFragment != null) {
+		if(eligibleFragment == null) {
+			// no child element contains the differentiating term, therefore this root element must be the most precise differentiator
+			return rootStructure;
+		} else {
+			StructureElement eligibleStructure = null; 
 			for(StructureElement structChild : rootStructure.getChildren()) {
 				if(structChild.getTag().contentEquals(eligibleFragment.getTag())) {
 					eligibleStructure = structChild;
 				}
 			}
-		} else {
-			CELogger.log().error("No eligible child fragment found when searching for '" + word + "' (" + tag + ")");
-			return null;
-		}
+			
+			if(eligibleStructure != null) {
+				return getDifferentiator(eligibleFragment, eligibleStructure, word, tag);
+			} else {
+				// no further improvement in search for governor possible
+				return rootStructure;
+			}
+		}		
 		
-		if(eligibleStructure != null) {
-			return getDifferentiator(eligibleFragment, eligibleStructure, word, tag);
-		} else {
-			// no further improvement in search for governor possible
-			return rootStructure;
-		}
 	}
 	
 	@Override

@@ -9,7 +9,9 @@ public class Configuration {
 			"database/ceexamples2.json",
 			};
 	public static final String[] TESTING_FILES = {
-			"database/cee_ahe.json"
+			"database/cee_ahe.json",
+			"database/cee_lod.json",
+			"database/cee_asp.json"
 			};
 	public static final String TRAINING_FILE_SPECIAL =
 			"database/ceexamples_reduced.json";

@@ -269,4 +269,9 @@ public class Leaf extends Fragment {
 			return super.getCoveredText();
 		}
 	}
+	
+	@Override
+	public String structureToString() {
+		return null;
+	}
 }

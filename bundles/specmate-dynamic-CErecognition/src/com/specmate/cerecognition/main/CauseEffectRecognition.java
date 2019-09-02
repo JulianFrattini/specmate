@@ -36,12 +36,12 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 	@Activate
 	public void start() {
 		trainer = new CauseEffectTrainer(this);
-		if(Configuration.AUTO_TRAIN) {
+		/*if(Configuration.AUTO_TRAIN) {
 			train();
 			
 			test();
-		}
-		//trainSpecial();
+		}*/
+		trainSpecial();
 	}
 	
 	public CauseEffectRecognition() {
@@ -85,6 +85,7 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		
 		ISentence sen = annotator.createSentence(sentence);
 		ICauseEffectGraph ceg = new SimpleCauseEffectGraph(cause, effect);
+		CELogger.log().info(" " + sen.getRoot().structureToString());
 		CELogger.log().info(" " + sen.getRoot().toString(true, false));
 		CELogger.log().info(" " + sen.getRoot().toString(false, true));
 
