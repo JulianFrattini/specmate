@@ -26,6 +26,13 @@ public class CELogger {
 		initialized = true;
 	}
 	
+	public void initializeIfNeccessary(PrintStream out) {
+		if(!initialized) {
+			this.out = out;
+			initialized = true;
+		}
+	}
+	
 	public void info(String text) {
 		if(initialized) {
 			log(Configuration.LOG_LEVEL_INFO, text, out);

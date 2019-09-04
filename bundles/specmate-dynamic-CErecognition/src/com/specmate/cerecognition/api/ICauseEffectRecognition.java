@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.specmate.cerecognition.causeeffectgraph.ICauseEffectGraph;
 import com.specmate.cerecognition.main.CauseEffectRecognitionResult;
 import com.specmate.cerecognition.pattern.IPattern;
+import com.specmate.cerecognition.trainer.CausalityExample;
 
 public interface ICauseEffectRecognition {
 
@@ -12,6 +13,6 @@ public interface ICauseEffectRecognition {
 
 	public ICauseEffectGraph getCEG(String sentence);
 
-	public CauseEffectRecognitionResult train(String sentence, String cause, String effect);
+	public CauseEffectRecognitionResult train(CausalityExample sentence);
 
 }

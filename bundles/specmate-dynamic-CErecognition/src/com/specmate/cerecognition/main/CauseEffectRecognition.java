@@ -9,7 +9,6 @@ import org.osgi.service.component.annotations.Reference;
 import com.specmate.cerecognition.api.ICauseEffectRecognition;
 import com.specmate.cerecognition.causeeffectgraph.ICauseEffectGraph;
 import com.specmate.cerecognition.causeeffectgraph.ICauseEffectPattern;
-import com.specmate.cerecognition.causeeffectgraph.SimpleCauseEffectGraph;
 import com.specmate.cerecognition.genetics.ICommandGenerator;
 import com.specmate.cerecognition.genetics.SimpleCommandGenerator;
 import com.specmate.cerecognition.pattern.IPattern;
@@ -18,6 +17,8 @@ import com.specmate.cerecognition.pattern.Pattern;
 import com.specmate.cerecognition.sentence.DKProSentenceAnnotator;
 import com.specmate.cerecognition.sentence.ISentence;
 import com.specmate.cerecognition.trainer.JSONCausalityExampleReader;
+import com.specmate.cerecognition.trainer.CausalityExample;
+import com.specmate.cerecognition.trainer.CauseEffectTester;
 import com.specmate.cerecognition.trainer.CauseEffectTrainer;
 import com.specmate.cerecognition.trainer.ICausalityExampleReader;
 import com.specmate.cerecognition.util.CELogger;
@@ -32,16 +33,18 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 	private ArrayList<IPattern> patterns;
 	private ICommandGenerator generator;
 	private CauseEffectTrainer trainer;
+	private CauseEffectTester tester;
 	
 	@Activate
 	public void start() {
 		trainer = new CauseEffectTrainer(this);
-		/*if(Configuration.AUTO_TRAIN) {
+		tester = new CauseEffectTester(this);
+		if(Configuration.AUTO_TRAIN) {
 			train();
 			
 			test();
-		}*/
-		trainSpecial();
+		}
+		//trainSpecial();
 	}
 	
 	public CauseEffectRecognition() {
@@ -67,24 +70,32 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		}
 		
 		if(patternFound != null) {
-			System.out.println("Sentence '" + sentence + "' is accepted by pattern #" + patternFound.getIndex());
-			return patternFound.generateCauseEffectGraph(sen);
+			CELogger.log().info("Sentence '" + sentence + "' is accepted by pattern #" + patternFound.getIndex());
+			ICauseEffectGraph ceg = patternFound.generateCauseEffectGraph(sen);
+			
+			if(ceg != null) {
+				return ceg;
+			} else {
+				CELogger.log().error("But the patterns generation algorithm does not create a cause-effect-graph!");
+				CELogger.log().error("This sentence probably has to be deflected.");
+				return null;
+			}
 		} else {
 			return null;
 		}
 	}
 	
 	@Override
-	public CauseEffectRecognitionResult train(String sentence, String cause, String effect) {
+	public CauseEffectRecognitionResult train(CausalityExample sentence) {
 		CauseEffectRecognitionResult result = null;
 		
-		CELogger.log().info("Training the sentence \"" + sentence + "\"");
-		if(!cause.isEmpty() && !effect.isEmpty()) {
-			CELogger.log().info(" Causal relation: " + cause + " -> " + effect);
+		CELogger.log().info("Training the sentence \"" + sentence.getSentence() + "\"");
+		if(sentence.isCausal()) {
+			CELogger.log().info(" Causal relation: " + sentence.getCause() + " -> " + sentence.getEffect());
 		}
 		
-		ISentence sen = annotator.createSentence(sentence);
-		ICauseEffectGraph ceg = new SimpleCauseEffectGraph(cause, effect);
+		ISentence sen = annotator.createSentence(sentence.getSentence());
+		ICauseEffectGraph ceg = sentence.getCEG();
 		CELogger.log().info(" " + sen.getRoot().structureToString());
 		CELogger.log().info(" " + sen.getRoot().toString(true, false));
 		CELogger.log().info(" " + sen.getRoot().toString(false, true));
@@ -100,7 +111,7 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		if(patternFound == null) {
 			CELogger.log().info("Found no pattern ... ");
 			// no existing pattern found, creating a new one
-			if(!cause.isEmpty() && !effect.isEmpty()) {
+			if(sentence.isCausal()) {
 				CELogger.log().info("generating a new one!");
 				
 				ICauseEffectPattern newPattern = generator.generateCommandPatterns(sen, ceg);
@@ -133,30 +144,21 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 				result = CauseEffectRecognitionResult.DISCARDING_SUCCESSFUL;
 			}
 		} else {
+			// existing pattern found
 			CELogger.log().info("Found a complying pattern :");
 			CELogger.log().info(patternFound.toString());
-			// existing pattern found
-			if(patternFound.checkSentenceCompliance(sen, ceg)) {
-				CELogger.log().info("The complying pattern does generate the correct expressions!");
-				patternFound.addSentence(sen);
-				
-				result = CauseEffectRecognitionResult.RECOGNITION_SUCCESSFUL;
-			} else {
-				// the sentence erroneously complies with the pattern
-				CELogger.log().warn("The found pattern does not generate the right CEG!");
-				
-				if(cause.isEmpty() && effect.isEmpty()) {
-					// intruding sentence
-					boolean deflectionSuccessful = patternFound.deflectIntruder(sen);
-				
-					if(deflectionSuccessful) {
-						CELogger.log().info("The found pattern now deflects the sentence correctly");
-						result = CauseEffectRecognitionResult.DEFLECTION_SUCCESSFUL;
-					} else {
-						CELogger.log().warn("The found pattern does is unable to deflect the intruder!");
-						result = CauseEffectRecognitionResult.DEFLECTION_FAILED;
-					}
+			
+			if(sentence.isCausal()) {
+				// check compliance
+				if(patternFound.checkSentenceCompliance(sen, ceg)) {
+					CELogger.log().info("The complying pattern does generate the correct expressions!");
+					patternFound.addSentence(sen);
+					
+					result = CauseEffectRecognitionResult.RECOGNITION_SUCCESSFUL;
 				} else {
+					// the sentence erroneously complies with the pattern
+					CELogger.log().warn("The found pattern does not generate the right CEG!");
+					
 					// pattern has to be split in two
 					IStructure otherStructure = patternFound.differentiateSimilar(sen);
 					
@@ -194,6 +196,17 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 						result = CauseEffectRecognitionResult.SPLITTING_FAILED;
 					}
 				}
+			} else {
+				// intruding sentence
+				boolean deflectionSuccessful = patternFound.deflectIntruder(sen);
+			
+				if(deflectionSuccessful) {
+					CELogger.log().info("The found pattern now deflects the sentence correctly");
+					result = CauseEffectRecognitionResult.DEFLECTION_SUCCESSFUL;
+				} else {
+					CELogger.log().warn("The found pattern does is unable to deflect the intruder!");
+					result = CauseEffectRecognitionResult.DEFLECTION_FAILED;
+				}
 			}
 		}
 		
@@ -228,13 +241,13 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 	}
 	
 	public void test() {
-		trainer.resetStatistics();
-		for(String file : Configuration.TESTING_FILES) {
+		tester.resetStatistics();
+		for(String file : Configuration.TESTING_FILES_PURE) {
 			ICausalityExampleReader reader = new JSONCausalityExampleReader();
 			reader.initialize(file);
-			trainer.train(reader);
+			tester.test(reader);
 		}
-		trainer.printStatistics();
+		tester.printStatistics();
 	}
 	
 	@Reference

@@ -1,26 +1,26 @@
 package com.specmate.cerecognition.trainer;
 
+import com.specmate.cerecognition.causeeffectgraph.ICauseEffectGraph;
+import com.specmate.cerecognition.causeeffectgraph.SimpleCauseEffectGraph;
+
 public class CausalityExample {
 	private String sentence;
-	private String cause;
-	private String effect;
+	private ICauseEffectGraph ceg;
 	
 	public CausalityExample(String sentence) {
 		super();
 		this.sentence = sentence;
-		cause = "";
-		effect = "";
+		ceg = null;
 	}
 	
 	public CausalityExample(String sentence, String cause, String effect) {
 		super();
 		this.sentence = sentence;
-		this.cause = cause;
-		this.effect = effect;
+		this.ceg = new SimpleCauseEffectGraph(cause, effect);
 	}
 	
 	public boolean isCausal() {
-		return !cause.isEmpty() && !effect.isEmpty();
+		return ceg != null;
 	}
 
 	public String getSentence() {
@@ -28,17 +28,21 @@ public class CausalityExample {
 	}
 
 	public String getCause() {
-		return cause;
+		return ceg.getCause();
 	}
 
 	public String getEffect() {
-		return effect;
+		return ceg.getEffect();
+	}
+	
+	public ICauseEffectGraph getCEG() {
+		return ceg;
 	}
 	
 	@Override
 	public String toString() {
 		if(isCausal()) {
-			return sentence + " (" + cause + " -> " + effect + ")";
+			return sentence + " (" + getCause() + " -> " + getEffect() + ")";
 		} else {
 			return sentence;
 		}

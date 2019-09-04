@@ -66,7 +66,13 @@ public class Pattern implements IPattern {
 	}
 	
 	public boolean checkSentenceCompliance(ISentence candidate, ICauseEffectGraph ceg) {
-		return cePattern.generateGraphFromSentence(candidate).equals(ceg);
+		ICauseEffectGraph generated = cePattern.generateGraphFromSentence(candidate);
+		
+		if(generated != null) {
+			return generated.equals(ceg);
+		} else {
+			return false;
+		}
 	}
 	
 	public void addSentence(ISentence candidate) {

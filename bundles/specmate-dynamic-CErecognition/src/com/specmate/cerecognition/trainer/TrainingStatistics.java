@@ -9,9 +9,11 @@ import com.specmate.cerecognition.util.CELogger;
 public class TrainingStatistics {
 	private HashMap<CauseEffectRecognitionResult, ArrayList<CausalityExample>> results;
 	private boolean printOnlyFailingExamples;
+	private boolean printOnlyOccurringCategories;
 	
 	public TrainingStatistics(boolean printOnlyFailingExamples) {
 		this.printOnlyFailingExamples = printOnlyFailingExamples;
+		this.printOnlyOccurringCategories = false;
 		
 		results = new HashMap<CauseEffectRecognitionResult, ArrayList<CausalityExample>>();
 		for(CauseEffectRecognitionResult type : CauseEffectRecognitionResult.values()) {
@@ -19,6 +21,10 @@ public class TrainingStatistics {
 		}
 	}
 	
+	public void setPrintOnlyOccurringCategories(boolean printOnlyOccurringCategories) {
+		this.printOnlyOccurringCategories = printOnlyOccurringCategories;
+	}
+
 	public void add(CausalityExample example, CauseEffectRecognitionResult resultType) {
 		results.get(resultType).add(example);
 	}
@@ -37,6 +43,11 @@ public class TrainingStatistics {
 			}
 			
 			int typeOccurrence = results.get(type).size();
+			
+			if(printOnlyOccurringCategories && typeOccurrence == 0) {
+				continue;
+			}
+			
 			CELogger.log().info("Examples trained with result type " + type.toString() + " (" + typeOccurrence + " times, " + getPercentile(typeOccurrence, examples) + "%): "); 
 			for(CausalityExample obj : results.get(type)) {
 				CELogger.log().info(" - " + obj.toString());

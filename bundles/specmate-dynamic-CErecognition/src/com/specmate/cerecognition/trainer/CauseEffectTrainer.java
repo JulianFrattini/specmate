@@ -26,7 +26,7 @@ public class CauseEffectTrainer {
 		CELogger.log().info("============INITIALIZING TRAINING===============");
 		
 		for(CausalityExample example : examples) {
-			CauseEffectRecognitionResult result = subject.train(example.getSentence(), example.getCause(), example.getEffect());
+			CauseEffectRecognitionResult result = subject.train(example);
 			
 			statistics.add(example, result);
 		}

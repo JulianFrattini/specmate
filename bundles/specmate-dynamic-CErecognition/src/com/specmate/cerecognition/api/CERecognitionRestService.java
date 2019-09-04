@@ -14,6 +14,7 @@ import org.osgi.service.component.annotations.Reference;
 import com.specmate.cerecognition.causeeffectgraph.ICauseEffectGraph;
 import com.specmate.cerecognition.main.CauseEffectRecognitionResult;
 import com.specmate.cerecognition.pattern.IPattern;
+import com.specmate.cerecognition.trainer.CausalityExample;
 import com.specmate.cerecognition.util.CELogger;
 import com.specmate.common.exception.SpecmateException;
 import com.specmate.emfrest.api.IRestService;
@@ -45,9 +46,19 @@ public class CERecognitionRestService extends RestServiceBase  {
 				queryParams.containsKey("cause") && 
 				queryParams.containsKey("effect")) {
 			// training a new pattern
-			CauseEffectRecognitionResult result = main.train(queryParams.getFirst("sentence"),
-						queryParams.getFirst("cause"),
-						queryParams.getFirst("effect")); 
+			String cause = queryParams.getFirst("cause");
+			String effect = queryParams.getFirst("effect");
+			
+			CausalityExample sentence = null;
+			if(!cause.isEmpty() && !effect.isEmpty()) {
+				sentence = new CausalityExample(queryParams.getFirst("sentence"),
+						cause,
+						effect);
+			} else {
+				sentence = new CausalityExample(queryParams.getFirst("sentence"));
+			}
+			
+			CauseEffectRecognitionResult result = main.train(sentence); 
 	
 			return new RestResult<>(Response.Status.OK, "Trained Cause-Effect-Recognition with result " + result.toString());
 		} else {
