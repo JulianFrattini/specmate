@@ -14,5 +14,5 @@ public interface ICauseEffectRecognition {
 	public ICauseEffectGraph getCEG(String sentence);
 
 	public CauseEffectRecognitionResult train(CausalityExample sentence);
-
+	public boolean isExampleValid(CausalityExample sentence);
 }

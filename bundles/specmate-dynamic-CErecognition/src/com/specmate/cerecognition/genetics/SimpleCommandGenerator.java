@@ -23,8 +23,11 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 	public ICauseEffectPattern generateCommandPatterns(ISentence sentence, ICauseEffectGraph graph) {
 		SimpleCauseEffectGraph simpleCE = (SimpleCauseEffectGraph) graph;		
 		
-		SimpleCauseEffectGenerator causeGenerator = generateCommandPattern(sentence, simpleCE.getCause());
-		SimpleCauseEffectGenerator effectGenerator = generateCommandPattern(sentence, simpleCE.getEffect());
+		String cause = simpleCE.getCausePrepared();
+		String effect = simpleCE.getEffectPrepared();
+		
+		SimpleCauseEffectGenerator causeGenerator = generateCommandPattern(sentence, cause);
+		SimpleCauseEffectGenerator effectGenerator = generateCommandPattern(sentence, effect);
 
 		if(causeGenerator == null || effectGenerator == null) {
 			return null;

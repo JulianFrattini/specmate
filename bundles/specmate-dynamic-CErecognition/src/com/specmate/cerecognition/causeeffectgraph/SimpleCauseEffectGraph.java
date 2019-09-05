@@ -19,19 +19,47 @@ public class SimpleCauseEffectGraph implements ICauseEffectGraph {
 	public String getEffect() {
 		return effect;
 	}
+	
+	public String getCausePrepared() {
+		return prepareExpression(cause);
+	}
+
+	public String getEffectPrepared() {
+		return prepareExpression(effect);
+	}
+	
+	private String prepareExpression(String expression) {
+		String result = expression;
+		
+		if(result.contains("n't")) {
+			System.out.println("Expression '" + result + "' contained n't");
+			result = result.replaceAll("n't", " n't");
+		}
+		if(result.contains("'s")) {
+			System.out.println("Expression '" + result + "' contained 's");
+			result = result.replaceAll("'s", " 's");
+		}
+		
+		return result;
+	}
 
 	@Override
 	public boolean equals(ICauseEffectGraph other) {
-		if(!cause.equals(other.getCause())) {
+		CELogger.log().info("Checking compliance between CEG's:");
+		CELogger.log().info("  - generated: '" + getCause() + "' -> '" + getEffect() + "'");
+		CELogger.log().info("  - given: '" + other.getCausePrepared() + "' -> '" + other.getCausePrepared() + "'");
+		
+		
+		if(!getCause().equals(other.getCausePrepared())) {
 			CELogger.log().warn("ERROR: The causes do not align:");
-			CELogger.log().warn("\t- " + cause);
-			CELogger.log().warn("\t- " + other.getCause());
+			CELogger.log().warn("\t- " + getCause());
+			CELogger.log().warn("\t- " + other.getCausePrepared());
 			return false;
 		}
-		if(!effect.equals(other.getEffect())) {
+		if(!getEffect().equals(other.getEffectPrepared())) {
 			CELogger.log().warn("ERROR: The effects do not align:");
-			CELogger.log().warn("\t- " + effect);
-			CELogger.log().warn("\t- " + other.getEffect());
+			CELogger.log().warn("\t- " + getEffect());
+			CELogger.log().warn("\t- " + other.getEffectPrepared());
 			return false;
 		}
 		return true;

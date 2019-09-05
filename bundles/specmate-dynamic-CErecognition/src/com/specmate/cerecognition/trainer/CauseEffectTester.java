@@ -29,7 +29,7 @@ public class CauseEffectTester {
 		for(CausalityExample example : examples) {
 			CauseEffectRecognitionResult result = null;
 			
-			if(isExampleValid(example)) {
+			if(subject.isExampleValid(example)) {
 				ICauseEffectGraph ceg = subject.getCEG(example.getSentence());
 				
 				if(example.isCausal()) {
@@ -58,27 +58,6 @@ public class CauseEffectTester {
 		}
 		
 		CELogger.log().info("==============ENDING TESTING================");
-	}
-	
-	/**
-	 * Checks, whether the cause- and effect-expression of a causal example are valid substrings of the sentence
-	 * @param example Causal or non-causal sentence
-	 * @return True, if the example is possibly analyzable
-	 */
-	private boolean isExampleValid(CausalityExample example) {
-		if(example.isCausal()) {
-			if(example.getSentence().contains(example.getCause()) &&
-					example.getSentence().contains(example.getEffect())) {
-				// an example is only valid, if the cause- and effect-expression is a substring of the sentence
-				return true;
-			} else {
-				// there is no possibility to extract the expressions
-				return false;
-			}
-		} else {
-			// non-causal sentences just have to be discarded
-			return true;
-		}
 	}
 	
 	public void resetStatistics() {

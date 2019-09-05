@@ -94,6 +94,12 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 			CELogger.log().info(" Causal relation: " + sentence.getCause() + " -> " + sentence.getEffect());
 		}
 		
+		if(!isExampleValid(sentence)) {
+			result = CauseEffectRecognitionResult.RECOGNITION_IMPOSSIBLE;
+			CELogger.log().warn("The sentence cannot be analyzed, because cause and/or effect are not substrings of the sentence.");
+			return result;
+		}
+		
 		ISentence sen = annotator.createSentence(sentence.getSentence());
 		ICauseEffectGraph ceg = sentence.getCEG();
 		CELogger.log().info(" " + sen.getRoot().structureToString());
@@ -214,12 +220,29 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		return result;
 	}
 	
+	/**
+	 * Checks, whether the cause- and effect-expression of a causal example are valid substrings of the sentence
+	 * @param example Causal or non-causal sentence
+	 * @return True, if the example is possibly analyzable
+	 */
+	public boolean isExampleValid(CausalityExample example) {
+		if(example.isCausal()) {
+			if(example.getSentence().contains(example.getCause()) &&
+					example.getSentence().contains(example.getEffect())) {
+				// an example is only valid, if the cause- and effect-expression is a substring of the sentence
+				return true;
+			} else {
+				// there is no possibility to extract the expressions
+				return false;
+			}
+		} else {
+			// non-causal sentences just have to be discarded
+			return true;
+		}
+	}
+	
 	public boolean checkPatternCompliance(ISentence sentence, ICauseEffectPattern pattern, ICauseEffectGraph ceg) {
 		ICauseEffectGraph generated = pattern.generateGraphFromSentence(sentence);
-		
-		CELogger.log().info("Checking pattern compliance between CEG's of " + sentence.toString());
-		CELogger.log().info("  - given: '" + ceg.getCause() + "' -> '" + ceg.getEffect() + "'");
-		CELogger.log().info("  - generated: '" + generated.getCause() + "' -> '" + generated.getEffect() + "'");
 		
 		return generated.equals(ceg);
 	}
