@@ -125,6 +125,19 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 				}
 			}
 			
+			if(governor == null) {
+				// no governor found within the leafChain, try finding one outside
+				ArrayList<Leaf> outsiders = root.getAllLeafs();
+				for(Leaf outsider : outsiders) {
+					if(!leafChain.contains(outsider)) {
+						if(outsider.isGoverningAllLeafs(leafChain)) {
+							governor = outsider;
+							break;
+						}
+					}
+				}
+			}
+			
 			if(governor != null) {
 				// generate a selector picking the governing leaf
 				SimpleCommand selectEligible = generateCommandSelector(root, governor);
@@ -141,9 +154,11 @@ public class SimpleCommandGenerator implements ICommandGenerator {
 				return selectEligible;
 			} else {
 				// unable to find a governing leaf in the leaf chain
+				CELogger.log().error("Unable to find a governor");
 				return null;
 			}
 		} else {
+			CELogger.log().error("Unable to find the leaf chain");
 			// unable to find a chain of leafs representing the phrase
 			return null;
 		}

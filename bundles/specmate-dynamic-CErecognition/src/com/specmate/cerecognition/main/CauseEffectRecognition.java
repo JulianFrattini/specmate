@@ -225,11 +225,13 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 	}
 	
 	public void train() {
+		ArrayList<CausalityExample> training_data = new ArrayList<CausalityExample>();
 		for(String file : Configuration.TRAINING_FILES) {
 			ICausalityExampleReader reader = new JSONCausalityExampleReader();
 			reader.initialize(file);
-			trainer.train(reader);
+			training_data.addAll(reader.readExamples());
 		}
+		trainer.train(training_data);
 		trainer.printStatistics();
 	}
 	
@@ -242,11 +244,13 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 	
 	public void test() {
 		tester.resetStatistics();
+		ArrayList<CausalityExample> testing_data = new ArrayList<CausalityExample>();
 		for(String file : Configuration.TESTING_FILES_PURE) {
 			ICausalityExampleReader reader = new JSONCausalityExampleReader();
 			reader.initialize(file);
-			tester.test(reader);
+			testing_data.addAll(reader.readExamples());
 		}
+		tester.test(testing_data);
 		tester.printStatistics();
 	}
 	

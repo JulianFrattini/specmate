@@ -11,7 +11,8 @@ public class Configuration {
 			"database/causeeffect/training/cee_jfr_dnd.json",
 			"database/causeeffect/training/cee_jfr_pc.json",
 			"database/causeeffect/training/cee_jfr_sw.json",
-			"database/causeeffect/training/cee_jfr_re.json"
+			"database/causeeffect/training/cee_jfr_re.json",
+			"database/causeeffect/training/cee_jfr_colloquial.json"
 			//"database/causeeffect/ceexamples.json",
 			//"database/causeeffect/ceexamples2.json",
 			};
