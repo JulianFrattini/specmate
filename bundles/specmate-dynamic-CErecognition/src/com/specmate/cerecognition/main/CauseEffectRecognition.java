@@ -20,6 +20,7 @@ import com.specmate.cerecognition.trainer.JSONCausalityExampleReader;
 import com.specmate.cerecognition.trainer.CausalityExample;
 import com.specmate.cerecognition.trainer.CauseEffectTester;
 import com.specmate.cerecognition.trainer.CauseEffectTrainer;
+import com.specmate.cerecognition.trainer.ExampleSet;
 import com.specmate.cerecognition.trainer.ICausalityExampleReader;
 import com.specmate.cerecognition.util.CELogger;
 import com.specmate.cerecognition.util.Configuration;
@@ -39,12 +40,18 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 	public void start() {
 		trainer = new CauseEffectTrainer(this);
 		tester = new CauseEffectTester(this);
-		if(Configuration.AUTO_TRAIN) {
+		
+		/*if(Configuration.AUTO_TRAIN) {
 			train();
 			
-			test();
-		}
+			test(false);
+		}*/
 		//trainSpecial();
+		
+		train(1);
+		System.out.println("Number of patterns resulting: " + patterns.size());
+		
+		//performStudy(2, 3, 5);
 	}
 	
 	public CauseEffectRecognition() {
@@ -95,7 +102,7 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		}
 		
 		if(!isExampleValid(sentence)) {
-			result = CauseEffectRecognitionResult.RECOGNITION_IMPOSSIBLE;
+			result = CauseEffectRecognitionResult.CREATION_IMPOSSIBLE;
 			CELogger.log().warn("The sentence cannot be analyzed, because cause and/or effect are not substrings of the sentence.");
 			return result;
 		}
@@ -247,14 +254,55 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		return generated.equals(ceg);
 	}
 	
-	public void train() {
-		ArrayList<CausalityExample> training_data = new ArrayList<CausalityExample>();
+	public void performStudy(int RQ, int study, int iteration) {
+		if(RQ == 1) {
+			if(study == 1) {
+				train(1);
+			} else if(study == 2) {
+				if(iteration == 1) {
+					trainAndTestRandomPortion(0.2);
+				} else if(iteration == 2) {
+					trainAndTestRandomPortion(0.1);
+				}
+			} else if (study == 3) {
+				switch(iteration) {
+					case 1: trainAndTestRandomPortion(0.2, 0.2); break;
+					case 2: trainAndTestRandomPortion(0.2, 0.4); break;
+					case 3: trainAndTestRandomPortion(0.2, 0.6); break;
+					case 4: trainAndTestRandomPortion(0.2, 0.8); break;
+					case 5: trainAndTestRandomPortion(0.2, 1); break;
+					default: trainAndTestRandomPortion(0.2, 1); break;
+				}
+			}
+		} else if(RQ == 2) {
+			if(study == 1) {
+				train(1);
+				test(true);
+			} else if(study == 2) {
+				train(1);
+				test(false);
+			} else if(study == 3) {
+				switch(iteration) {
+					case 1: train(0.2); break;
+					case 2: train(0.4); break;
+					case 3: train(0.6); break;
+					case 4: train(0.8); break;
+					case 5: train(1); break;
+					default: train(1); break;
+				}
+				test(false);
+			}
+		}
+	}
+	
+	public void train(double portion) {
+		ExampleSet trainingData = new ExampleSet();
 		for(String file : Configuration.TRAINING_FILES) {
 			ICausalityExampleReader reader = new JSONCausalityExampleReader();
 			reader.initialize(file);
-			training_data.addAll(reader.readExamples());
+			trainingData.addSet(reader.readExamples());
 		}
-		trainer.train(training_data);
+		trainer.train(trainingData.getPortion(portion));
 		trainer.printStatistics();
 	}
 	
@@ -265,15 +313,69 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		trainer.printStatistics();
 	}
 	
-	public void test() {
+	public void test(boolean original) {
+		String path = original ? Configuration.TESTING_PATH_ORIGINAL_ : Configuration.TESTING_PATH_PURE;
+		
 		tester.resetStatistics();
-		ArrayList<CausalityExample> testing_data = new ArrayList<CausalityExample>();
-		for(String file : Configuration.TESTING_FILES_PURE) {
+		ExampleSet testingData = new ExampleSet();
+		for(String file : Configuration.TESTING_FILES) {
+			ICausalityExampleReader reader = new JSONCausalityExampleReader();
+			reader.initialize(path+file);
+			testingData.addSet(reader.readExamples());
+		}
+		tester.test(testingData);
+		tester.printStatistics();
+	}
+	
+	/**
+	 * Splits the training data into two parts, trains with one and tests with the other
+	 * @param segment Percentage [0, 1.0] of testing data
+	 */
+	public void trainAndTestRandomPortion(double segment) {
+		// setup the training
+		ExampleSet allData = new ExampleSet();
+		for(String file : Configuration.TRAINING_FILES) {
 			ICausalityExampleReader reader = new JSONCausalityExampleReader();
 			reader.initialize(file);
-			testing_data.addAll(reader.readExamples());
+			allData.addSet(reader.readExamples());
 		}
-		tester.test(testing_data);
+		
+		// split the set
+		ExampleSet trainingData = new ExampleSet();
+		ExampleSet testingData = new ExampleSet();
+		allData.split(segment, testingData, trainingData);
+		
+		// perform training
+		trainer.train(trainingData);
+		trainer.printStatistics();
+		
+		// perform testing
+		tester.test(testingData);
+		tester.printStatistics();
+	}
+	
+	public void trainAndTestRandomPortion(double segment, double evolution) {
+		// setup the training
+		ExampleSet allData = new ExampleSet();
+		for(String file : Configuration.TRAINING_FILES) {
+			ICausalityExampleReader reader = new JSONCausalityExampleReader();
+			reader.initialize(file);
+			allData.addSet(reader.readExamples());
+		}
+		
+		allData.setSet(allData.getPortion(evolution));
+		
+		// split the set
+		ExampleSet trainingData = new ExampleSet();
+		ExampleSet testingData = new ExampleSet();
+		allData.split(segment, testingData, trainingData);
+		
+		// perform training
+		trainer.train(trainingData);
+		trainer.printStatistics();
+		
+		// perform testing
+		tester.test(testingData);
 		tester.printStatistics();
 	}
 	

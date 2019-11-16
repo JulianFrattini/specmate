@@ -23,6 +23,10 @@ public class CauseEffectTester {
 		test(reader.readExamples());
 	}
 	
+	public void test(ExampleSet set) {
+		test(set.getSet());
+	}
+	
 	public void test(ArrayList<CausalityExample> examples) {
 		CELogger.log().info("============INITIALIZING TESTING===============");
 		

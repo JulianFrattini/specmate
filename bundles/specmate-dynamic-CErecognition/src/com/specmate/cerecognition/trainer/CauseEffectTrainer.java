@@ -22,6 +22,10 @@ public class CauseEffectTrainer {
 		train(reader.readExamples());
 	}
 	
+	public void train(ExampleSet set) {
+		train(set.getSet());
+	}
+	
 	public void train(ArrayList<CausalityExample> examples) {
 		CELogger.log().info("============INITIALIZING TRAINING===============");
 		

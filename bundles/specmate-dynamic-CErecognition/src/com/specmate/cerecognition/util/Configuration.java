@@ -16,27 +16,18 @@ public class Configuration {
 			//"database/causeeffect/ceexamples.json",
 			//"database/causeeffect/ceexamples2.json",
 			};
+	public static final String TESTING_PATH_ORIGINAL_= "database/causeeffect/testing/original/";
+	public static final String TESTING_PATH_PURE = "database/causeeffect/testing/purified/";
 	public static final String[] TESTING_FILES = {
-			"database/causeeffect/testing/original/cee_afr.json",
-			"database/causeeffect/testing/original/cee_ahe.json",
-			"database/causeeffect/testing/original/cee_aob.json",
-			"database/causeeffect/testing/original/cee_asp.json",
-			"database/causeeffect/testing/original/cee_lod.json",
-			"database/causeeffect/testing/original/cee_mbi.json",
-			"database/causeeffect/testing/original/cee_mfr.json",
-			"database/causeeffect/testing/original/cee_mse.json",
-			"database/causeeffect/testing/original/cee_nfr.json"
-			};
-	public static final String[] TESTING_FILES_PURE = {
-			"database/causeeffect/testing/purified/cee_afr.json",
-			"database/causeeffect/testing/purified/cee_ahe.json",
-			"database/causeeffect/testing/purified/cee_aob.json",
-			"database/causeeffect/testing/purified/cee_asp.json",
-			"database/causeeffect/testing/purified/cee_lod.json",
-			"database/causeeffect/testing/purified/cee_mbi.json",
-			"database/causeeffect/testing/purified/cee_mfr.json",
-			"database/causeeffect/testing/purified/cee_mse.json",
-			"database/causeeffect/testing/purified/cee_nfr.json"
+			"cee_afr.json",
+			"cee_ahe.json",
+			"cee_aob.json",
+			"cee_asp.json",
+			"cee_lod.json",
+			"cee_mbi.json",
+			"cee_mfr.json",
+			"cee_mse.json",
+			"cee_nfr.json"
 			};
 	public static final String TRAINING_FILE_SPECIAL =
 			"database/causeeffect/ceexamples_reduced.json";
