@@ -2,6 +2,13 @@ package com.specmate.cerecognition.util;
 
 import java.io.PrintStream;
 
+/**
+ * 
+ * @author Julian Frattini
+ * 
+ * Custom logger mainly tailored towards the evaluation of the author's master thesis
+ */
+
 public class CELogger {
 	
 	private static CELogger instance;

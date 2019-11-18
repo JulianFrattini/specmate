@@ -16,6 +16,10 @@ public class Sentence implements ISentence {
 		return index;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Fragment getRoot() {
 		return root;
 	}
@@ -25,13 +29,16 @@ public class Sentence implements ISentence {
 	}
 
 	/**
-	 * Extracts the constituency tree without its leaf nodes
+	 * {@inheritDoc}
 	 */
 	@Override
 	public IStructure generateStructure() {
 		return new Structure(root.generateStructure());
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		return index + ": " + root.toString(false, false);

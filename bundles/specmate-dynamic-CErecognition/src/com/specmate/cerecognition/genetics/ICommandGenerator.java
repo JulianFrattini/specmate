@@ -4,6 +4,14 @@ import com.specmate.cerecognition.causeeffectgraph.ICauseEffectGraph;
 import com.specmate.cerecognition.causeeffectgraph.ICauseEffectPattern;
 import com.specmate.cerecognition.sentence.ISentence;
 
+/**
+ * 
+ * @author Julian Frattini
+ *
+ * Interface for command generators, which are responsible for creating the genetic algorithm 
+ * to extract a phrase from a sentence
+ */
+
 public interface ICommandGenerator {
 	
 	/*

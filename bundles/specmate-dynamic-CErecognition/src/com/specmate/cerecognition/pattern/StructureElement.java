@@ -46,6 +46,12 @@ public class StructureElement {
 		return keywords_whitelist;
 	}
 
+	/**
+	 * Adds a keyword to this structure element, which either must (whitelist) or must not (blacklist) 
+	 * be contained by a fragment to be compliant to this structure element
+	 * @param keyword The keyword as a String
+	 * @param whitelist True, if the keyword shall be required, false, if it shall be forbidden
+	 */
 	public void addKeyword(String keyword, boolean whitelist) {
 		if(whitelist) {
 			keywords_whitelist.add(keyword);
@@ -196,16 +202,16 @@ public class StructureElement {
 		return clone;
 	}
 	
-	public void listAllProposed(boolean blacklist) {
+	public void listAllProposed(boolean whitelist) {
 		if(!proposedKeywords.isEmpty()) {
 			for(String keyword : proposedKeywords) {
-				(blacklist ? keywords_blacklist : keywords_whitelist).add(keyword);
+				(whitelist ? keywords_whitelist : keywords_blacklist).add(keyword);
 			}
 			proposedKeywords.clear();
 		}
 		
 		for(StructureElement child : children) {
-			child.listAllProposed(blacklist);
+			child.listAllProposed(whitelist);
 		}
 	}
 }

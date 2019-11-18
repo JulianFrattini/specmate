@@ -3,6 +3,14 @@ package com.specmate.cerecognition.trainer;
 import com.specmate.cerecognition.causeeffectgraph.ICauseEffectGraph;
 import com.specmate.cerecognition.causeeffectgraph.SimpleCauseEffectGraph;
 
+/**
+ * 
+ * @author Julian Frattini
+ * 
+ * Container class for data entries, which consists of a sentence and an optional cause-effect-graph,
+ * if the sentence is causal
+ */
+
 public class CausalityExample {
 	private String sentence;
 	private ICauseEffectGraph ceg;

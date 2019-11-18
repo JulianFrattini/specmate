@@ -1,5 +1,12 @@
 package com.specmate.cerecognition.util;
 
+/**
+ * 
+ * @author Julian Frattini
+ * 
+ * Class for global operations like distribution of sentence indices
+ */
+
 public class Globals {
 
 	private static Globals instance;
@@ -11,7 +18,9 @@ public class Globals {
 		return instance;
 	}
 	
-	// index of the annotated sentences
+	/**
+	 * index of the annotated sentences
+	 */
 	private int sentenceCounter;
 	
 	private int patternCounter;

@@ -27,6 +27,13 @@ import com.specmate.cerecognition.util.Configuration;
 import com.specmate.cerecognition.util.Globals;
 import com.specmate.nlp.api.INLPService;
 
+/**
+ * 
+ * @author Julian Frattini
+ * 
+ * Main component dealing with input
+ */
+
 @Component
 public class CauseEffectRecognition implements ICauseEffectRecognition{
 	private DKProSentenceAnnotator annotator;
@@ -38,20 +45,14 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 	
 	@Activate
 	public void start() {
+		// initialize statistics
 		trainer = new CauseEffectTrainer(this);
 		tester = new CauseEffectTester(this);
 		
-		/*if(Configuration.AUTO_TRAIN) {
-			train();
-			
-			test(false);
-		}*/
-		//trainSpecial();
-		
-		train(1);
-		System.out.println("Number of patterns resulting: " + patterns.size());
-		
-		//performStudy(2, 3, 5);
+		if(Configuration.AUTO_TRAIN) {
+			// train with all (1 = 100%) of the training data sets
+			train(1);
+		}
 	}
 	
 	public CauseEffectRecognition() {
@@ -64,10 +65,19 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		return patterns;
 	}
 	
+	/**
+	 * Attempt to generate a cause-effect-graph from a given sentence. This will work when 
+	 * the system already knows a causality pattern associated with the sentence's 
+	 * grammatical structure
+	 * @param sentence The sentence under test
+	 * @return A cause-effect-graph, if the sentence is identified by a causality pattern
+	 */
 	@Override
 	public ICauseEffectGraph getCEG(String sentence) {
+		// preprocess the sentence with NLP techniques
 		ISentence sen = annotator.createSentence(sentence);
 		
+		// try to find a causality pattern in the database of patterns
 		IPattern patternFound = null;
 		for(IPattern pattern : patterns) {
 			if(pattern.checkCompliance(sen)) {
@@ -77,21 +87,31 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		}
 		
 		if(patternFound != null) {
+			// pattern found: attempt to generate a cause-effect-graph from the sentence with the given causality pattern
 			CELogger.log().info("Sentence '" + sentence + "' is accepted by pattern #" + patternFound.getIndex());
 			ICauseEffectGraph ceg = patternFound.generateCauseEffectGraph(sen);
 			
 			if(ceg != null) {
 				return ceg;
 			} else {
+				// unable to generate a cause-effect, possibly because the sentence was compliant to the pattern due to lack of training
 				CELogger.log().error("But the patterns generation algorithm does not create a cause-effect-graph!");
 				CELogger.log().error("This sentence probably has to be deflected.");
 				return null;
 			}
 		} else {
+			// no pattern found: the sentence is assumed to be non-causal
 			return null;
 		}
 	}
 	
+	/**
+	 * Provide the system with a causality example containing a sentence and its causality portion.
+	 * The system will then attempt to generate a new causality pattern, which in turn will be able to
+	 * recognize grammatically similar sentences and extract the cause- and effect-expressions from it
+	 * @param sentence CausalityExample containing a sentence and its causality portion
+	 * @return CauseEffectRecognitionResult evaluating the training process
+	 */
 	@Override
 	public CauseEffectRecognitionResult train(CausalityExample sentence) {
 		CauseEffectRecognitionResult result = null;
@@ -101,6 +121,7 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 			CELogger.log().info(" Causal relation: " + sentence.getCause() + " -> " + sentence.getEffect());
 		}
 		
+		// check if the CausalityExample is actually valid: the cause- and effect-expression must be a valid substring of the sentence
 		if(!isExampleValid(sentence)) {
 			result = CauseEffectRecognitionResult.CREATION_IMPOSSIBLE;
 			CELogger.log().warn("The sentence cannot be analyzed, because cause and/or effect are not substrings of the sentence.");
@@ -113,7 +134,8 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		CELogger.log().info(" " + sen.getRoot().toString(true, false));
 		CELogger.log().info(" " + sen.getRoot().toString(false, true));
 
-		CELogger.log().info("Searching for a pattern complying the sentence's structure");
+		// verify if there already exists a pattern complying to the sentence's structure in the database
+		CELogger.log().info("Searching for a pattern complying to the sentence's structure");
 		IPattern patternFound = null;
 		for(IPattern pattern : patterns) {
 			if(pattern.checkCompliance(sen)) {
@@ -130,6 +152,7 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 				ICauseEffectPattern newPattern = generator.generateCommandPatterns(sen, ceg);
 				
 				if(newPattern != null) {
+					// check if the new pattern does generate the desired cause-effect-graph of the CausalityExample
 					if(checkPatternCompliance(sen, newPattern, ceg)) {
 						CELogger.log().info("The new pattern creates the desired expressions accordingly.");
 						IPattern fullPattern = new Pattern(Globals.getInstance().getNewPatternCounter(),
@@ -148,11 +171,13 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 						result = CauseEffectRecognitionResult.CREATION_FAILED;
 					}
 				} else {
+					// creation failed due to an unknown reason
 					CELogger.log().warn("The cause effect generator did not generate a new pattern!");
 
 					result = CauseEffectRecognitionResult.CREATION_FAILED;
 				}
 			} else {
+				// non-causal sentence correctly discarded
 				CELogger.log().info("The sentence was discarded correctly");
 				result = CauseEffectRecognitionResult.DISCARDING_SUCCESSFUL;
 			}
@@ -163,7 +188,7 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 			
 			if(sentence.isCausal()) {
 				// check compliance
-				if(patternFound.checkSentenceCompliance(sen, ceg)) {
+				if(patternFound.isAffiliated(sen, ceg)) {
 					CELogger.log().info("The complying pattern does generate the correct expressions!");
 					patternFound.addSentence(sen);
 					
@@ -210,7 +235,7 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 					}
 				}
 			} else {
-				// intruding sentence
+				// intruding sentence, attempt deflection by specifying the pattern
 				boolean deflectionSuccessful = patternFound.deflectIntruder(sen);
 			
 				if(deflectionSuccessful) {
@@ -248,12 +273,25 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		}
 	}
 	
+	/**
+	 * Checks, whether a given sentence is compliant to a pattern and generates the desired cause-effect-graph
+	 * @param sentence Sentence under test
+	 * @param pattern Possibly compliant pattern
+	 * @param ceg Cause-effect-graph that should result when applying the patterns extraction algorithms to the sentence
+	 * @return True, if the sentence is compliant to the pattern
+	 */
 	public boolean checkPatternCompliance(ISentence sentence, ICauseEffectPattern pattern, ICauseEffectGraph ceg) {
 		ICauseEffectGraph generated = pattern.generateGraphFromSentence(sentence);
 		
 		return generated.equals(ceg);
 	}
 	
+	/**
+	 * Auxiliary method for performing the research study in the Master's Thesis of Julian Frattini
+	 * @param RQ Index of the research question
+	 * @param study Sub-index of the research question
+	 * @param iteration Sub-sub-index of the research question
+	 */
 	public void performStudy(int RQ, int study, int iteration) {
 		if(RQ == 1) {
 			if(study == 1) {
@@ -295,6 +333,10 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		}
 	}
 	
+	/**
+	 * Train the database of pattern with a set of training files
+	 * @param portion Gradient (between 0 and 1) of how much percent of the data shall be used to train the system, where train(1) uses all data entries
+	 */
 	public void train(double portion) {
 		ExampleSet trainingData = new ExampleSet();
 		for(String file : Configuration.TRAINING_FILES) {
@@ -306,13 +348,10 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		trainer.printStatistics();
 	}
 	
-	public void trainSpecial() {
-		ICausalityExampleReader reader = new JSONCausalityExampleReader();
-		reader.initialize(Configuration.TRAINING_FILE_SPECIAL);
-		trainer.train(reader);
-		trainer.printStatistics();
-	}
-	
+	/**
+	 * Automatically testing all provided test data sets
+	 * @param original True, if the originally provided data shall be used, false if the purified (partially corrected) data shall be used
+	 */
 	public void test(boolean original) {
 		String path = original ? Configuration.TESTING_PATH_ORIGINAL_ : Configuration.TESTING_PATH_PURE;
 		
@@ -354,6 +393,11 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		tester.printStatistics();
 	}
 	
+	/**
+	 * Trains the system and with a portion of the training data
+	 * @param segment Percentage (given as a value from 0 to 1) of the data entries, which are used as the testing data
+	 * @param evolution Percentage (given as a value from 0 to 1) of the data entries, which are used at all
+	 */
 	public void trainAndTestRandomPortion(double segment, double evolution) {
 		// setup the training
 		ExampleSet allData = new ExampleSet();

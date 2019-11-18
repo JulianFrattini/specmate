@@ -25,7 +25,7 @@ public class Node extends Fragment {
 
 	/**
 	 * Returns only those children that have children themselves (meaning that they are relevant for the structure)
-	 * @return
+	 * @return A list of all child nodes, that have child nodes themselves
 	 */
 	public ArrayList<Fragment> getParentingChildren() {
 		ArrayList<Fragment> parenting = new ArrayList<Fragment>();
@@ -39,6 +39,10 @@ public class Node extends Fragment {
 		return parenting;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public ArrayList<Leaf> getAllLeafs() {
 		ArrayList<Leaf> result = new ArrayList<Leaf>();
 		
@@ -49,7 +53,10 @@ public class Node extends Fragment {
 		return result;
 	}
 	
-	// Optimize by index
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public Leaf getLeafByToken(int beginIndex) {
 		for(Fragment child : children) {
 			Leaf result = child.getLeafByToken(beginIndex);
@@ -60,6 +67,9 @@ public class Node extends Fragment {
 		return null;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean isParenting(Fragment other) {
 		for(Fragment child : children) {
@@ -75,6 +85,9 @@ public class Node extends Fragment {
 		return false;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public StructureElement generateStructure() {
 		StructureElement structure = new StructureElement(super.getTag());
@@ -86,18 +99,23 @@ public class Node extends Fragment {
 		return structure;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public ArrayList<Fragment> split() {
 		return children;
 	}
 	
-	@Override 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public ArrayList<Fragment> getBy(boolean byType, String indicator, ArrayList<Fragment> selected) {
 		if(byType && super.getTag().equals(indicator)) {
 			selected.add(this);
 		} else if(!byType && toString().equals(indicator)) {
 			selected.add(this);
-			//return selected;
 		}
 		
 		for(Fragment child : children) {
@@ -107,7 +125,10 @@ public class Node extends Fragment {
 		return selected;
 	}
 	
-	@Override 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public ArrayList<Leaf> getLeafs(boolean byType, String indicator, ArrayList<Leaf> selected) {
 		for(Fragment child : children) {
 			child.getLeafs(byType, indicator, selected);
@@ -116,6 +137,9 @@ public class Node extends Fragment {
 		return selected;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public ArrayList<Fragment> select(boolean byType, String indicator, ArrayList<Fragment> selected) {
 		if(byType && super.getTag().equals(indicator)) {
@@ -133,6 +157,9 @@ public class Node extends Fragment {
 		return selected;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Fragment getParentOf(Fragment child) { 
 		for(Fragment own_child : children) {
@@ -143,6 +170,9 @@ public class Node extends Fragment {
 		return null;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Fragment getDirectParentOf(Fragment child) {
 		for(Fragment own_child : children) {
@@ -156,6 +186,9 @@ public class Node extends Fragment {
 		return null;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean contains(boolean byType, String indicator) {
 		if(byType && super.getTag().equals(indicator)) {
@@ -172,6 +205,9 @@ public class Node extends Fragment {
 		return false;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean contains(Fragment fragment) {
 		if(this.equals(fragment)) {
@@ -207,11 +243,17 @@ public class Node extends Fragment {
 		return false;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		return super.getCoveredText();
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString(boolean structurized, boolean dependencies) {
 		if(structurized) {
@@ -227,6 +269,9 @@ public class Node extends Fragment {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString(ArrayList<Fragment> highlights) {
 		if(highlights.contains(this)) {
@@ -240,6 +285,9 @@ public class Node extends Fragment {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String structureToString() {
 		String result = "(" + super.getTag() + ")";

@@ -2,6 +2,13 @@ package com.specmate.cerecognition.causeeffectgraph;
 
 import com.specmate.cerecognition.util.CELogger;
 
+/**
+ * 
+ * @author julian
+ * Simple version of a cause-effect-graph only containing one cause-phrase and one effect-phrase.
+ * More complex relations like the resolution of conjunctions, negations, or else, is neglected here
+ */
+
 public class SimpleCauseEffectGraph implements ICauseEffectGraph {
 
 	private String cause;
@@ -28,6 +35,11 @@ public class SimpleCauseEffectGraph implements ICauseEffectGraph {
 		return prepareExpression(effect);
 	}
 	
+	/**
+	 * Counters some NLP-specific processing faults like splitting n't from negated words
+	 * @param expression Expression to be corrected
+	 * @return cause/effect expression corrected of NLP-processing faults
+	 */
 	private String prepareExpression(String expression) {
 		String result = expression;
 		

@@ -2,6 +2,13 @@ package com.specmate.cerecognition.genetics;
 
 import com.specmate.cerecognition.sentence.Fragment;
 
+/**
+ * @author Julian Frattini
+ * 
+ * Superclass of a simple version of commands. Commands can be chained together linearly via successors,
+ * where the last command of each succession has to be a CommandSelect.
+ */
+
 public abstract class SimpleCommand implements ICommand {
 
 	protected SimpleCommand successor;
@@ -14,6 +21,10 @@ public abstract class SimpleCommand implements ICommand {
 		this.successor = successor;
 	}
 	
+	/**
+	 * Pushes a new command to the end of the line of succession
+	 * @param successor command, which shall be the last command of the succession
+	 */
 	public void chainCommand(SimpleCommand successor) {
 		if(this.successor == null) {
 			this.successor = successor;
@@ -21,9 +32,6 @@ public abstract class SimpleCommand implements ICommand {
 			this.successor.chainCommand(successor);
 		}
 	}
-	
-	public abstract String generateOutput(Fragment fragment) ;
-	public abstract String toString();
 	
 	/** 
 	 * Generates a reference to the last command in the succession of commands.
@@ -37,4 +45,9 @@ public abstract class SimpleCommand implements ICommand {
 			throw new IllegalArgumentException("Last command in the succession is not a 'select'-command");
 		}
 	}
+	
+	// generates the string phrase of a sentence
+	public abstract String generateOutput(Fragment fragment);
+	
+	public abstract String toString();
 }

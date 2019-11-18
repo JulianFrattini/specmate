@@ -1,5 +1,11 @@
 package com.specmate.cerecognition.main;
 
+/**
+ * 
+ * @author Julian Frattini
+ * Classes of results to evaluate the runs of the system
+ */
+
 public enum CauseEffectRecognitionResult {
 	CREATION_SUCCESSFUL, CREATION_FAILED, CREATION_IMPOSSIBLE,
 	RECOGNITION_SUCCESSFUL, RECOGNITION_FAILED, RECOGNITION_IMPOSSIBLE, 

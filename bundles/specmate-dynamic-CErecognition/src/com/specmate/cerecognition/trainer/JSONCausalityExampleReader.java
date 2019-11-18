@@ -9,6 +9,24 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+/**
+ * 
+ * @author Julian Frattini
+ * 
+ * Reader class capable of reading JSON-Files. The file must have the following structure:
+ * 	[
+		{
+			"sentence": "This is a causal sentence example, because it contains a causality.",
+			"causality": {
+				"cause": "it contains a causality",
+				"effect": "This is a causal sentence example"
+			}
+		}, {
+			"sentence": "This is a non-causal sentence example"
+		}, ...
+	]
+ */
+
 public class JSONCausalityExampleReader implements ICausalityExampleReader {
 
 	private JSONArray examples;
@@ -18,6 +36,9 @@ public class JSONCausalityExampleReader implements ICausalityExampleReader {
 		initialized = false;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void initialize(String filename) {
 		File file = new File(filename);
@@ -25,6 +46,9 @@ public class JSONCausalityExampleReader implements ICausalityExampleReader {
 		initialize(file);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void initialize(File examplefile) {
 		try {
@@ -37,6 +61,9 @@ public class JSONCausalityExampleReader implements ICausalityExampleReader {
 		}
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public ArrayList<CausalityExample> readExamples() {
 		ArrayList<CausalityExample> result = new ArrayList<CausalityExample>();

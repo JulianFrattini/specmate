@@ -2,6 +2,15 @@ package com.specmate.cerecognition.trainer;
 
 import java.util.ArrayList;
 
+/**
+ * 
+ * @author Julian Frattini
+ * 
+ * Container class for a list of CausalityExamples. The main purpose of this class is to
+ * manage the list of examples and especially provide support for evaluation methods like
+ * a cross-validation.
+ */
+
 public class ExampleSet {
 	private ArrayList<CausalityExample> set;
 	
@@ -21,6 +30,11 @@ public class ExampleSet {
 		this.set.addAll(set);
 	}
 
+	/**
+	 * Returns a randomly selected portion of the full set
+	 * @param percentage Relative size of the portion given in the range of 0 to 1 (=100%)
+	 * @return A percentage of the set of examples
+	 */
 	@SuppressWarnings("unchecked")
 	public ArrayList<CausalityExample> getPortion(double percentage) {
 		ArrayList<CausalityExample> portion = new ArrayList<CausalityExample>();
@@ -42,6 +56,12 @@ public class ExampleSet {
 		return portion;
 	}
 
+	/**
+	 * Randomly splits the example set into two exclusive sets
+	 * @param ratio Relative size of set one given in the range of 0 to 1 (=100%)
+	 * @param one Resulting first set
+	 * @param two Resulting second set
+	 */
 	@SuppressWarnings("unchecked")
 	public void split(double ratio, ExampleSet one, ExampleSet two) {
 		ArrayList<CausalityExample> portion = new ArrayList<CausalityExample>();

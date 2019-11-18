@@ -6,6 +6,14 @@ import java.util.StringJoiner;
 import com.specmate.cerecognition.sentence.Fragment;
 import com.specmate.cerecognition.util.CELogger;
 
+/**
+ * 
+ * @author Julian Frattini
+ * 
+ * Command for vertical selection. Given a sentence in the form of a tree of syntactical nodes
+ * select one of a specific type/content.
+ */
+
 public class CommandSelect extends SimpleCommand {
 	
 	/*
@@ -88,7 +96,7 @@ public class CommandSelect extends SimpleCommand {
 			if(selected.size() > 0) {
 				selection = selected.get(index);
 				
-				
+			// error case: either 0 or more than 1 nodes were applicable to the selection
 			} else if(selected.size() == 0) {
 				CELogger.log().warn("CommandSelect did not identify an eligible result");
 				CELogger.log().warn("  Sentence under test: " + fragment.toString(false, false));
@@ -100,8 +108,10 @@ public class CommandSelect extends SimpleCommand {
 		
 		if(selection != null) {
 			if(successor == null) {
+				// construct the cause-/effect-expression
 				return constructResult(selection);
 			} else {
+				// continue processing recursively
 				return successor.generateOutput(selection);
 			}
 		} else {
@@ -109,13 +119,21 @@ public class CommandSelect extends SimpleCommand {
 		}
 	}
 	
+	/**
+	 * Construct the cause-/effect-expression 
+	 * @param selection fragment identified by this select command
+	 * @return cause-/effect-expression
+	 */
 	private String constructResult(Fragment selection) {
 		if(horizontalSelection.isEmpty()) {
+			// no horizontal selection, simply use the text covered by the selected fragment node
 			return selection.getCoveredText();
 		} else {
 			// horizontal selection is active and CommandPick's have to be resolved
 			String[] result = new String[horizontalSelection.size()+1];
 			
+			// resolve all pick commands, order them in an array and place the content of the selected
+			// fragment node in the according position
 			for(int i = 0; i < result.length; i++) {
 				if(i < positionOfSelectedBetweenHorizontalSelection) {
 					result[i] = horizontalSelection.get(i).generateOutput(selection);
@@ -128,7 +146,7 @@ public class CommandSelect extends SimpleCommand {
 			
 			StringJoiner sj = new StringJoiner(" ");
 			for(String s : result) {
-				// attempt to ignore all empty picker-results
+				// ignore all empty picker-results
 				if(!s.isEmpty()) 
 					sj.add(s);
 			}

@@ -4,6 +4,13 @@ import com.specmate.cerecognition.genetics.SimpleCommand;
 import com.specmate.cerecognition.sentence.Fragment;
 import com.specmate.cerecognition.util.CELogger;
 
+/**
+ * 
+ * @author julian
+ * Wrapper around a SimpleCommand, which is the most basic form of genetic algorithms extracting
+ * one specific substring from a sentence
+ */
+
 public class SimpleCauseEffectGenerator {
 	
 	private SimpleCommand command;
@@ -16,6 +23,11 @@ public class SimpleCauseEffectGenerator {
 		return command;
 	}
 	
+	/**
+	 * Applies the extraction-algorithm to a sentence in internal representation
+	 * @param fragment grammatic root of a sentence
+	 * @return the specific extracted phrase
+	 */
 	public String generateCEElement(Fragment fragment) {
 		if(command == null) {
 			CELogger.log().warn("Command is not defined (object is null)!");
@@ -25,10 +37,8 @@ public class SimpleCauseEffectGenerator {
 		try {
 			return command.generateOutput(fragment);
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
