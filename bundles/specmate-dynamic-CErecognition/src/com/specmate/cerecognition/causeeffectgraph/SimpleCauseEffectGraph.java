@@ -4,7 +4,7 @@ import com.specmate.cerecognition.util.CELogger;
 
 /**
  * 
- * @author julian
+ * @author Julian Frattini
  * Simple version of a cause-effect-graph only containing one cause-phrase and one effect-phrase.
  * More complex relations like the resolution of conjunctions, negations, or else, is neglected here
  */
@@ -19,18 +19,34 @@ public class SimpleCauseEffectGraph implements ICauseEffectGraph {
 		this.effect = effect;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public String getCause() {
 		return cause;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public String getEffect() {
 		return effect;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public String getCausePrepared() {
 		return prepareExpression(cause);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public String getEffectPrepared() {
 		return prepareExpression(effect);
 	}
@@ -55,6 +71,9 @@ public class SimpleCauseEffectGraph implements ICauseEffectGraph {
 		return result;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean equals(ICauseEffectGraph other) {
 		CELogger.log().info("Checking compliance between CEG's:");
@@ -77,6 +96,9 @@ public class SimpleCauseEffectGraph implements ICauseEffectGraph {
 		return true;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		return cause + " -> " + effect;

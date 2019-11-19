@@ -16,32 +16,33 @@ import com.specmate.cerecognition.util.CELogger;
 
 public class CommandSelect extends SimpleCommand {
 	
-	/*
+	/**
 	 * Simple selection of the current node;
 	 */
 	private boolean take;
 	
-	/*
+	/**
 	 * Simple selection byType of the tag / word indicator
 	 */
 	private boolean byType;
 	private String indicator;
 	
-	/*
+	/**
 	 * Sometimes a fragment tree contains multiple nodes with identical attributes
 	 * (same text and type). In order to identify which fragment to chose, the selector
 	 * can be extended with an index.
 	 */
 	private int index;
 	
-	/*
+	/**
 	 * Sometimes the content of a CEElement (cause/effect) are not all grouped in
 	 * one exclusive branch of the constituency-tree. In this case, a governing parent
 	 * leaf is chosen which has a reference on all other leaf nodes relevant for the
 	 * CEElement.
 	 */
 	private ArrayList<CommandPick> horizontalSelection;
-	/*
+	
+	/**
 	 * The positionOfSelectedBetweenHorizontalSelection is the index, at which position
 	 * the governing parent leaf is located between its governed references
 	 */
@@ -81,6 +82,9 @@ public class CommandSelect extends SimpleCommand {
 		positionOfSelectedBetweenHorizontalSelection = pos;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String generateOutput(Fragment fragment) {
 		Fragment selection = null;
@@ -154,6 +158,9 @@ public class CommandSelect extends SimpleCommand {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -177,6 +184,9 @@ public class CommandSelect extends SimpleCommand {
 		return sb.toString();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public CommandSelect getFinal() {
 		if(successor == null) {

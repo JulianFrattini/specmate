@@ -18,7 +18,7 @@ import com.specmate.cerecognition.util.CELogger;
 
 public class CommandSplit extends SimpleCommand {
 	
-	/*
+	/**
 	 * index of the child branch with which the commands are to be continued
 	 */
 	private int continuationIndex;
@@ -27,6 +27,9 @@ public class CommandSplit extends SimpleCommand {
 		this.continuationIndex = continuationIndex;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String generateOutput(Fragment fragment) {
 		// split the current fragment into its child fragments
@@ -45,6 +48,9 @@ public class CommandSplit extends SimpleCommand {
 		return null;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		String result = "split&continue with " + continuationIndex;

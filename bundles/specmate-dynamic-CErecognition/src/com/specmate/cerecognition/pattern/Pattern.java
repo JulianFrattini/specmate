@@ -12,19 +12,19 @@ public class Pattern implements IPattern {
 	
 	private int index;
 
-	/* 
+	/**
 	 * structure of the sentence: constituency tree of the sentence 
 	 * stripped of the leaf nodes containing only words
 	 */
 	private IStructure sentenceStructure; 
 	
-	/*
+	/**
 	 * genetic algorithm extracting the cause and effect from the 
 	 * sentence of a specific structure
 	 */
 	private ICauseEffectPattern cePattern;
 	
-	/*
+	/**
 	 * Collection of all sentences complying the sentenceStructure
 	 */
 	private ArrayList<ISentence> accepted;
@@ -37,18 +37,34 @@ public class Pattern implements IPattern {
 		accepted = new ArrayList<ISentence>();
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public int getIndex() {
 		return index;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public IStructure getStructure() {
 		return sentenceStructure;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public ICauseEffectPattern getGenerationPattern() {
 		return cePattern;
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public ArrayList<ISentence> getAccepted() {
 		return accepted;
 	}

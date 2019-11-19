@@ -7,10 +7,21 @@ import com.specmate.cerecognition.sentence.Fragment;
 import com.specmate.cerecognition.sentence.Node;
 
 public class StructureElement {
+	
 	private ArrayList<StructureElement> children;
 	
 	private String tag;
+	
+	/**
+	 * List of all words, that have to be included in the 'covered text' of a 
+	 * corresponding fragment from a sentence
+	 */
 	private ArrayList<String> keywords_whitelist;
+	
+	/**
+	 * List of all words, that are forbidden to be included in the 'covered text'
+	 * of a corresponding fragment from a sentence
+	 */
 	private ArrayList<String> keywords_blacklist;
 	
 	// this list is an intermediate memory for the keyword generation process

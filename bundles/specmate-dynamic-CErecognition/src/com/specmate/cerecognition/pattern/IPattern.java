@@ -18,9 +18,29 @@ import com.specmate.cerecognition.sentence.ISentence;
  */
 
 public interface IPattern {
+	
+	/**
+	 * Gets the index of this causality pattern
+	 * @return The index of this causality pattern
+	 */
 	public int getIndex();
+	
+	/**
+	 * Gets the sentence structure, which identifies this pattern
+	 * @return The sentence structure of this causality pattern
+	 */
 	public IStructure getStructure();
+	
+	/**
+	 * Gets the generation pattern, which contains the extraction algorithms
+	 * @return The generation pattern of this causality pattern
+	 */
 	public ICauseEffectPattern getGenerationPattern();
+	
+	/**
+	 * Gets the list of already accepted and approved sentences to this causality pattern
+	 * @return List of accepted sentences
+	 */
 	public ArrayList<ISentence> getAccepted();
 	
 	/**
@@ -67,5 +87,9 @@ public interface IPattern {
 	 */
 	public IStructure differentiateSimilar(ISentence sentence);
 	
+	/**
+	 * Gets the causality pattern in a human-readable form
+	 * @return Causality pattern in a human-readable form
+	 */
 	public String toString();
 }

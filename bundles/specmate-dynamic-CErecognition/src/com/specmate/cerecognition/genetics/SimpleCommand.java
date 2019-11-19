@@ -46,8 +46,15 @@ public abstract class SimpleCommand implements ICommand {
 		}
 	}
 	
-	// generates the string phrase of a sentence
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public abstract String generateOutput(Fragment fragment);
 	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public abstract String toString();
 }

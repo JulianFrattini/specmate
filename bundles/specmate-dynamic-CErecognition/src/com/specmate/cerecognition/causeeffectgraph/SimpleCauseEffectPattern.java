@@ -5,7 +5,7 @@ import com.specmate.cerecognition.util.CELogger;
 
 /**
  * 
- * @author julian
+ * @author Julian Frattini
  * Simple version of a cause-effect-pattern mapped to the SimpleCauseEffectGraph, where a 
  * sentence is processed be exactly two genetic algorithms, yielding one cause- and one
  * effect-phrase.
@@ -23,7 +23,7 @@ public class SimpleCauseEffectPattern implements ICauseEffectPattern {
 	}
 
 	/**
-	 * Applies the two genetic algorithms to the sentence and filters the cause- and effect-expression
+	 * {@inheritDoc}
 	 */
 	@Override
 	public ICauseEffectGraph generateGraphFromSentence(ISentence sentence) {
@@ -43,10 +43,9 @@ public class SimpleCauseEffectPattern implements ICauseEffectPattern {
 	}
 
 	/**
-	 * Generates a human-readable form of the genetic algorithms
-	 * @param cause True, if the genetic algorithm for the cause-phrase is selected, False for effect-algorithm
-	 * @return The genetic extraction-algorithm in human-readable form
+	 * {@inheritDoc}
 	 */
+	@Override
 	public String getCommandString(boolean cause) {
 		if(cause) {
 			return generateCause.toString();

@@ -33,6 +33,9 @@ public class CommandPick extends SimpleCommand {
 		this.index = index;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String generateOutput(Fragment fragment) {
 		if(!(fragment instanceof Leaf)) {
@@ -68,7 +71,10 @@ public class CommandPick extends SimpleCommand {
 		CELogger.log().warn("No governed leaf node found that complies the given dependency type");
 		return "";
 	}
-
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String toString() {
 		return "pick " + dependencyType + (successor == null ? "" : "->" + successor.toString());

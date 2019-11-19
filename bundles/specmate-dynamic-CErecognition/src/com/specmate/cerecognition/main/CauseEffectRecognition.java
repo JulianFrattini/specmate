@@ -31,7 +31,8 @@ import com.specmate.nlp.api.INLPService;
  * 
  * @author Julian Frattini
  * 
- * Main component dealing with input
+ * Main component distributing input, managing the knowledge database of causality patterns
+ * and preparing results of computation.
  */
 
 @Component
@@ -50,7 +51,7 @@ public class CauseEffectRecognition implements ICauseEffectRecognition{
 		tester = new CauseEffectTester(this);
 		
 		if(Configuration.AUTO_TRAIN) {
-			// train with all (1 = 100%) of the training data sets
+			// train with all (1 = 100%) entries of the training data sets
 			train(1);
 		}
 	}

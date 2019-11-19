@@ -12,6 +12,19 @@ import com.specmate.cerecognition.sentence.Fragment;
  */
 
 public interface ICommand {
+	
+	/**
+	 * Extracts a specific phrase from a sentence based on the chain on commands
+	 * @param fragment Root node of the sentence, where the phrase is to be extracted
+	 * @return The phrase extracted from the sentence
+	 * @throws IllegalArgumentException Thrown if specific commands are invoked on invalid commands
+	 * @throws Exception Thrown if command invokations cannot be resolved
+	 */
 	public String generateOutput(Fragment fragment) throws IllegalArgumentException, Exception;
+	
+	/**
+	 * Converts the command chain into human-readable form
+	 * @return Chain of commands in readable form
+	 */
 	public String toString();
 }

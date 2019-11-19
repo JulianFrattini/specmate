@@ -6,7 +6,7 @@ import com.specmate.cerecognition.util.CELogger;
 
 /**
  * 
- * @author julian
+ * @author Julian Frattini
  * Wrapper around a SimpleCommand, which is the most basic form of genetic algorithms extracting
  * one specific substring from a sentence
  */
