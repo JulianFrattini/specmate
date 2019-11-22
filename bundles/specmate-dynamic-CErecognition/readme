@@ -1,0 +1,79 @@
+==============================================================
+Dynamic Cause-Effect-Recognition
+==============================================================
+
+This package has been developed by Julian Frattini at the TUM
+in the Master's Thesis "Interactive Learning of Cause-Effect-
+Patterns" supervised by Dr. Maximilian Junker.
+
+==============================================================
+Quickstart
+==============================================================
+
+--------------------------------------------------------------
+Integration into specmate
+--------------------------------------------------------------
+
+The dynamic cause-effect-recognition (cerec) can be used in
+the code of specmate by adding an Object implementing the 
+interface ICauseEffectRecognition to your code.
+A cerec has two main methods for interaction:
+ - train: takes a CausalityExample and generates a new pattern
+ 	from it
+ - getCEG: attempts to generate the cause-effect-graph from
+ 	a sentence, if its pattern is already known
+Use the training method to add new patterns to the system and
+use the testing method to automatically generate cause-effect-
+graphs of known sentence patterns.
+
+--------------------------------------------------------------
+Standalone
+--------------------------------------------------------------
+
+The cerec can be used independently with the interface
+provided by CERecognitionRestService. The following REST-
+operations are supported under 
+http://localhost:8080/services/rest/test-data/cerec:
+ - POST : 
+  - query parameters "sentence", "cause", "effect":
+  	Will trigger a training operation in the system. The
+  	fields "cause" and "effect" may be left empty to train
+  	a non-causal sentence
+ - GET : 
+  - query parameters (none): Returns a list of all created
+  	patterns. Useful for development purposes
+  - query parameters "sentence": Will trigger a getCEG/test
+  	operation in the system and attempt to generate a
+  	cause-effect-graph from the given sentence
+
+--------------------------------------------------------------
+Configuration
+--------------------------------------------------------------
+
+The algorithm can be previously trained when the cerec is 
+initiated by providing training data from the start. For this
+create training data files (currently only .json is supported)
+and add the path to each file (including the file extension):
+com.specmate.cerecognition.util.Configuration, variable
+TRAINING_FILES
+Set the variable AUTO_TRAIN to true and the algorithm will
+attempt to read all training files and train the system with
+the contained causality examples.
+
+The format of .json training files has to comply the following:
+[
+	{
+		"sentence": "This is a causal sentence example, because 
+					it contains a causality.",
+		"causality": {
+			"cause": "it contains a causality",
+			"effect": "This is a causal sentence example"
+		}
+	}, {
+		"sentence": "This is a non-causal sentence example"
+	}, ...
+]
+
+The log level can also be adapted in the Configuration. A log
+level of 0 will show every log entry, a log level of 100 will 
+only display fatal errors.

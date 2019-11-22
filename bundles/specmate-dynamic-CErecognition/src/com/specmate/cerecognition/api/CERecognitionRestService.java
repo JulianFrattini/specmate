@@ -99,6 +99,10 @@ public class CERecognitionRestService extends RestServiceBase  {
 		}
 	}
 	
+	/**
+	 * Creates a list of all currently existing patterns
+	 * @return List of all currently existing patterns
+	 */
 	private JSONArray createPatternOverview() {
 		JSONArray array = new JSONArray();
 		
@@ -124,6 +128,11 @@ public class CERecognitionRestService extends RestServiceBase  {
 		return array;
 	}
 	
+	/**
+	 * Performs a testing operation on the system and attempts to generate a cause-effect-graph from a sentence
+	 * @param sentence The sentence under test
+	 * @return The evaluation of the system with a cause-effect-graph, if the sentence is causal and its patern already known
+	 */
 	private JSONObject checkSentence(String sentence) {
 		ICauseEffectGraph generatedCauseEffectGraph = main.getCEG(sentence);
 		
